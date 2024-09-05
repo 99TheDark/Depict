@@ -1,0 +1,14 @@
+[package]
+name = "depict"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["depict-core", "depict-macro"]
+
+[dependencies]
+depict-core = { path = "depict-core" }
+depict-macro = { path = "depict-macro" }
+
+# [lib]
+# crate-type = ["lib"]
