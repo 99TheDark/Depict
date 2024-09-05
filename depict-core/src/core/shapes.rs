@@ -20,16 +20,19 @@ impl Renderable for Rectangle {
         batch.triangle(
             Vertex {
                 pos: [self.x, self.y],
+                color: self.fill.to_array(),
                 uv: [0.0, 0.0],
                 tex_idx: 0,
             },
             Vertex {
                 pos: [self.x + self.width, self.y],
+                color: self.fill.to_array(),
                 uv: [0.0, 0.0],
                 tex_idx: 0,
             },
             Vertex {
                 pos: [self.x, self.y + self.height],
+                color: self.fill.to_array(),
                 uv: [0.0, 0.0],
                 tex_idx: 0,
             },
@@ -38,16 +41,19 @@ impl Renderable for Rectangle {
         batch.triangle(
             Vertex {
                 pos: [self.x + self.width, self.y],
+                color: self.fill.to_array(),
                 uv: [0.0, 0.0],
                 tex_idx: 0,
             },
             Vertex {
                 pos: [self.x, self.y + self.height],
+                color: self.fill.to_array(),
                 uv: [0.0, 0.0],
                 tex_idx: 0,
             },
             Vertex {
                 pos: [self.x + self.width, self.y + self.height],
+                color: self.fill.to_array(),
                 uv: [0.0, 0.0],
                 tex_idx: 0,
             },

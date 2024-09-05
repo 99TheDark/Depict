@@ -2,25 +2,24 @@ use std::{cell::RefCell, rc::Rc};
 
 use depict_core::core::{
     color::Color,
-    context::{InitContext, RenderContext, UpdateContext},
+    context::{Context, PartialContext},
     engine::Engine,
     settings::Settings,
     shapes::Rectangle,
     system::System,
 };
-use depict_macro::shape;
 
 struct Game {}
 
 impl<'a> System<'a> for Game {
-    fn init(&mut self, ctx: &mut InitContext) {
-        println!("Initialized");
+    fn init(&mut self, ctx: &mut PartialContext) {
+        println!("Initialized!");
     }
 
-    fn update(&mut self, ctx: &mut UpdateContext) {}
+    fn update(&mut self, ctx: &mut Context) {}
 
-    fn render(&mut self, ctx: &mut RenderContext) {
-        ctx.draw(&Rectangle::new(0.0, 0.0, 0.1, 0.5));
+    fn render(&mut self, ctx: &mut Context) {
+        ctx.draw(&Rectangle::new(0.0, 0.0, 0.1, 0.5).with_fill(Color::BLUE));
     }
 }
 

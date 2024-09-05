@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use image::GenericImageView;
 use wgpu::{
     AddressMode, Device, Extent3d, FilterMode, ImageCopyTexture, ImageDataLayout, Origin3d, Queue,
     SamplerDescriptor, TextureAspect, TextureDescriptor, TextureDimension, TextureFormat,
     TextureUsages, TextureViewDescriptor,
 };
+use winit::window::Window;
 
 use crate::{
     engine::{
@@ -15,7 +18,7 @@ use crate::{
 
 use super::{render::Renderable, texture::TextureSource};
 
-pub struct InitContext<'a> {
+pub struct PartialContext<'a> {
     pub(crate) texture_count: usize,
     pub(crate) textures: Vec<TextureSource>,
     pub(crate) device: &'a Device,
@@ -23,7 +26,7 @@ pub struct InitContext<'a> {
     pub size: Size,
 }
 
-impl<'a> InitContext<'a> {
+impl<'a> PartialContext<'a> {
     pub fn image(&mut self, bytes: &[u8]) -> TextureSource {
         let image = image::load_from_memory(bytes).unwrap();
         let id = self.texture_count as u32;
@@ -86,21 +89,40 @@ impl<'a> InitContext<'a> {
     }
 }
 
-// Might want to change to a general context with a step enum or something like that
-pub struct UpdateContext<'a> {
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum ContextStep {
+    Update,
+    Render,
+}
+
+pub struct Context<'a> {
+    pub(crate) step: ContextStep,
+    pub(crate) window: Arc<Window>,
     pub mouse: &'a Tracker<Mouse>,
     pub keyboard: &'a Tracker<Keyboard>,
+    pub(crate) renderer: Option<&'a mut Renderer>,
+    pub(crate) properties: &'a Properties,
 }
 
-pub struct RenderContext<'a> {
-    pub(crate) renderer: &'a mut Renderer,
-    pub(crate) properties: &'a Properties, // TODO: Remove
-}
-
-impl<'a> RenderContext<'a> {
+impl<'a> Context<'a> {
     pub fn draw(&mut self, renderable: &dyn Renderable) {
-        let mut batch = self.renderer.batch(true, &self.properties); // TODO: Get rid of properties here
+        if self.step != ContextStep::Render {
+            // TODO: Improve errors
+            panic!("Can only call renderable methods like draw in the render step, within\n\nfn render(&mut self, ctx: &mut RenderContext)");
+        }
+
+        let renderer = self.renderer.as_mut().unwrap();
+
+        let mut batch = renderer.batch(true, &self.properties); // TODO: Get rid of properties here
         renderable.render(&mut batch);
         batch.finish();
+    }
+
+    pub fn show_cursor(&mut self) {
+        self.window.set_cursor_visible(true);
+    }
+
+    pub fn hide_cursor(&mut self) {
+        self.window.set_cursor_visible(false)
     }
 }

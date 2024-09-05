@@ -1,18 +1,21 @@
 struct VertexInput {
     @location(0) pos: vec2<f32>,
-    @location(1) uv: vec2<f32>,
-    @location(2) tex_idx: u32,
+    @location(1) color: vec4<f32>,
+    @location(2) uv: vec2<f32>,
+    @location(3) tex_idx: u32,
 }
 
 struct VertexOutput {
     @builtin(position) pos: vec4<f32>,
-    @location(0) uv: vec2<f32>,
-    @location(1) tex_idx: u32,
+    @location(0) color: vec4<f32>,
+    @location(1) uv: vec2<f32>,
+    @location(2) tex_idx: u32,
 }
 
 @vertex
 fn vs_main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
+    out.color = in.color;
     out.uv = in.uv;
     out.pos = vec4<f32>(in.pos, 0.0, 1.0);
     out.tex_idx = in.tex_idx;
@@ -43,6 +46,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
     }*/
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    return in.color;
 }
  

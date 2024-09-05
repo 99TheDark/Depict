@@ -10,36 +10,52 @@ use wgpu::{
     VertexBufferLayout, VertexFormat, VertexState, VertexStepMode,
 };
 
+struct Attributes {
+    pub attributes: Vec<VertexAttribute>,
+    offset: u64,
+}
+
+impl Attributes {
+    fn new() -> Self {
+        Self {
+            attributes: Vec::new(),
+            offset: 0,
+        }
+    }
+
+    fn add(&mut self, format: VertexFormat) {
+        let attribute = VertexAttribute {
+            offset: self.offset,
+            shader_location: self.attributes.len() as u32,
+            format,
+        };
+
+        self.attributes.push(attribute);
+        self.offset += format.size();
+    }
+}
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Pod, Zeroable, PartialEq)]
 pub struct Vertex {
     pub pos: [f32; 2],
+    pub color: [f32; 4],
     pub uv: [f32; 2],
     pub tex_idx: u32,
 }
 
 impl Vertex {
     fn description() -> VertexBufferLayout<'static> {
+        let mut attributes = Attributes::new();
+        attributes.add(VertexFormat::Float32x2); // Position
+        attributes.add(VertexFormat::Float32x4); // Color
+        attributes.add(VertexFormat::Float32x2); // UV
+        attributes.add(VertexFormat::Uint32); // Texture ID
+
         VertexBufferLayout {
             array_stride: size_of::<Vertex>() as BufferAddress,
             step_mode: VertexStepMode::Vertex,
-            attributes: &[
-                VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: VertexFormat::Float32x2,
-                },
-                VertexAttribute {
-                    offset: size_of::<[f32; 2]>() as BufferAddress,
-                    shader_location: 1,
-                    format: VertexFormat::Float32x2,
-                },
-                VertexAttribute {
-                    offset: (size_of::<[f32; 2]>() * 2) as BufferAddress,
-                    shader_location: 2,
-                    format: VertexFormat::Uint32,
-                },
-            ],
+            attributes: attributes.attributes.leak(),
         }
     }
 }

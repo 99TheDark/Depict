@@ -13,7 +13,7 @@ use winit::window::Window;
 
 use crate::{
     core::{
-        context::{InitContext, RenderContext, UpdateContext},
+        context::{Context, ContextStep, PartialContext},
         settings::Settings,
         system::System,
         texture::TextureSource,
@@ -103,7 +103,7 @@ impl<'a> State<'a> {
         };
         surface.configure(&device, &config);
 
-        let mut ctx = InitContext {
+        let mut ctx = PartialContext {
             texture_count: 0,
             textures: Vec::new(),
             device: &device,
@@ -198,18 +198,26 @@ impl<'a> State<'a> {
 
     fn build(&mut self) -> (u32, Buffer, Buffer) {
         let mut renderer = Renderer::new();
-        self.system.borrow_mut().render(&mut RenderContext {
-            renderer: &mut renderer,
+        self.system.borrow_mut().render(&mut Context {
+            step: ContextStep::Render,
+            mouse: &self.mouse,
+            keyboard: &self.keyboard,
+            renderer: Some(&mut renderer),
             properties: &self.properties,
+            window: self.window.clone(),
         });
 
         renderer.build(&self.device)
     }
 
     pub fn update(&mut self) {
-        self.system.borrow_mut().update(&mut UpdateContext {
+        self.system.borrow_mut().update(&mut Context {
+            step: ContextStep::Update,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
+            renderer: None,
+            properties: &self.properties,
+            window: self.window.clone(),
         });
     }
 
