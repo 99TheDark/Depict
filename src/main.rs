@@ -1,6 +1,10 @@
+pub mod core;
+pub mod engine;
+pub mod input;
+
 use std::{cell::RefCell, rc::Rc};
 
-use depict_core::core::{
+use crate::core::{
     asset::Asset,
     context::{Context, PartialContext},
     engine::Engine,
