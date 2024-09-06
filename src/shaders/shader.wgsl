@@ -33,19 +33,23 @@ var s_tile: sampler;
 @group(0) @binding(3)
 var s_ui: sampler;*/
 
+// TODO: Automatically fill these in on the spot or use one large texture atlas
+@group(0) @binding(0)
+var texture1: texture_2d<f32>;
+
+@group(0) @binding(1)
+var sampler1: sampler;
+
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-    /*switch in.tex_idx {
-        case 0u {
-            return textureSample(t_tile, s_tile, in.uv);
-        }
+    // Also needs work
+    switch in.tex_idx {
         case 1u {
-            return textureSample(t_ui, s_ui, in.uv);
+            return textureSample(texture1, sampler1, in.uv);
         }
         default {
-            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            return in.color;
         }
-    }*/
-    return in.color;
+    }
 }
  

@@ -16,20 +16,22 @@ use crate::{
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
 
-use super::{render::Renderable, texture::TextureSource};
+use super::{asset::Asset, image::Image, render::Renderable};
 
 pub struct PartialContext<'a> {
-    pub(crate) texture_count: usize,
-    pub(crate) textures: Vec<TextureSource>,
+    pub(crate) image_count: usize,
+    pub(crate) images: Vec<Image>,
     pub(crate) device: &'a Device,
     pub(crate) queue: &'a Queue,
     pub size: Size,
 }
 
 impl<'a> PartialContext<'a> {
-    pub fn image(&mut self, bytes: &[u8]) -> TextureSource {
+    pub fn image(&mut self, bytes: &[u8]) -> Asset {
+        self.image_count += 1;
+
         let image = image::load_from_memory(bytes).unwrap();
-        let id = self.texture_count as u32;
+        let id = self.image_count as u32;
 
         let rgba = image.to_rgba8();
         let dimensions = image.dimensions();
@@ -78,14 +80,14 @@ impl<'a> PartialContext<'a> {
             ..Default::default()
         });
 
-        self.texture_count += 1;
-
-        TextureSource {
+        self.images.push(Image {
             image,
             id,
             view,
             sampler,
-        }
+        });
+
+        Asset { id }
     }
 }
 

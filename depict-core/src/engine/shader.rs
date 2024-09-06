@@ -10,6 +10,8 @@ use wgpu::{
     VertexBufferLayout, VertexFormat, VertexState, VertexStepMode,
 };
 
+use crate::core::properties::Background;
+
 struct Attributes {
     pub attributes: Vec<VertexAttribute>,
     offset: u64,
@@ -45,6 +47,23 @@ pub struct Vertex {
 }
 
 impl Vertex {
+    pub fn new(x: f32, y: f32, u: f32, v: f32, background: &Background) -> Self {
+        match background {
+            Background::Color(color) => Self {
+                pos: [x, y],
+                color: color.to_array(),
+                uv: [0.0, 0.0],
+                tex_idx: 0,
+            },
+            Background::Image(image) => Self {
+                pos: [x, y],
+                color: [0.0, 0.0, 0.0, 0.0],
+                uv: [u, v],
+                tex_idx: image.id,
+            },
+        }
+    }
+
     fn description() -> VertexBufferLayout<'static> {
         let mut attributes = Attributes::new();
         attributes.add(VertexFormat::Float32x2); // Position

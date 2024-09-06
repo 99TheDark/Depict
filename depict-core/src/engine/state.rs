@@ -14,9 +14,9 @@ use winit::window::Window;
 use crate::{
     core::{
         context::{Context, ContextStep, PartialContext},
+        image::Image,
         settings::Settings,
         system::System,
-        texture::TextureSource,
     },
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
@@ -28,7 +28,7 @@ use super::{
 };
 
 pub(crate) struct State<'a> {
-    pub(crate) textures: Vec<TextureSource>,
+    pub(crate) images: Vec<Image>,
     pub(crate) instance: Instance,
     pub(crate) surface: Surface<'a>,
     pub(crate) device: Device,
@@ -104,8 +104,8 @@ impl<'a> State<'a> {
         surface.configure(&device, &config);
 
         let mut ctx = PartialContext {
-            texture_count: 0,
-            textures: Vec::new(),
+            image_count: 0,
+            images: Vec::new(),
             device: &device,
             queue: &queue,
             size,
@@ -113,13 +113,13 @@ impl<'a> State<'a> {
 
         system.borrow_mut().init(&mut ctx);
 
-        let mut bind_layout_entries = Vec::with_capacity(ctx.texture_count * 2);
-        let mut bind_entries = Vec::with_capacity(ctx.texture_count * 2);
+        let mut bind_layout_entries = Vec::with_capacity(ctx.image_count * 2);
+        let mut bind_entries = Vec::with_capacity(ctx.image_count * 2);
 
-        for (idx, texture) in ctx.textures.iter().enumerate() {
+        for (idx, texture) in ctx.images.iter().enumerate() {
             let i = idx * 2;
 
-            bind_layout_entries[i] = BindGroupLayoutEntry {
+            bind_layout_entries.push(BindGroupLayoutEntry {
                 binding: i as u32,
                 visibility: ShaderStages::FRAGMENT,
                 ty: BindingType::Texture {
@@ -128,23 +128,22 @@ impl<'a> State<'a> {
                     sample_type: TextureSampleType::Float { filterable: true },
                 },
                 count: None,
-            };
-            bind_layout_entries[i + 1] = BindGroupLayoutEntry {
+            });
+            bind_layout_entries.push(BindGroupLayoutEntry {
                 binding: i as u32 + 1,
                 visibility: ShaderStages::FRAGMENT,
                 ty: BindingType::Sampler(SamplerBindingType::Filtering),
                 count: None,
-            };
+            });
 
-            bind_entries[i] = BindGroupEntry {
+            bind_entries.push(BindGroupEntry {
                 binding: i as u32,
                 resource: BindingResource::TextureView(&texture.view),
-            };
-
-            BindGroupEntry {
+            });
+            bind_entries.push(BindGroupEntry {
                 binding: i as u32 + 1,
                 resource: BindingResource::Sampler(&texture.sampler),
-            };
+            });
         }
 
         let texture_bind_group_layout =
@@ -171,7 +170,7 @@ impl<'a> State<'a> {
         let (count, vertex_buffer, index_buffer) = renderer.build(&device);
 
         State {
-            textures: ctx.textures,
+            images: ctx.images,
             instance,
             surface,
             device,
