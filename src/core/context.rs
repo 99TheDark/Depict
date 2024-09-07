@@ -100,6 +100,8 @@ pub(crate) enum ContextStep {
 pub struct Context<'a> {
     pub(crate) step: ContextStep,
     pub(crate) window: Arc<Window>,
+    pub size: Size,
+    pub window_size: Size,
     pub mouse: &'a Tracker<Mouse>,
     pub keyboard: &'a Tracker<Keyboard>,
     pub(crate) renderer: Option<&'a mut Renderer>,

@@ -31,6 +31,7 @@ impl Size {
     }
 }
 
+// TODO: Remove
 #[derive(Debug, Copy, Clone)]
 pub struct Properties {
     pub size: Size,

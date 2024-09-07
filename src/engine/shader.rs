@@ -99,7 +99,7 @@ impl Shader {
     pub fn build(
         &self,
         device: &Device,
-        texture_bind_group_layout: &BindGroupLayout,
+        bind_group_layouts: &[&BindGroupLayout],
     ) -> RenderPipeline {
         let mut os_path = current_dir().unwrap();
         os_path.push("src/");
@@ -118,7 +118,7 @@ impl Shader {
 
         let layout_descriptor = PipelineLayoutDescriptor {
             label: Some("Pipeline Layout"),
-            bind_group_layouts: &[&texture_bind_group_layout],
+            bind_group_layouts,
             push_constant_ranges: &[],
         };
         let layout = device.create_pipeline_layout(&layout_descriptor);

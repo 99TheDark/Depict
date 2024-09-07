@@ -79,52 +79,6 @@ impl<'a> RenderBatch<'a> {
         self.vertices.extend([a, b, c]);
     }
 
-    /*pub fn rectangle(&mut self, pos: Vec2) {
-        let (bottom_left, bottom_right, top_left, top_right) = (
-            self.apply(Vec2::ZERO, pos),
-            self.apply(Vec2::new(source.width as f32, 0.0), pos),
-            self.apply(Vec2::new(0.0, source.height as f32), pos),
-            self.apply(Vec2::new(source.width as f32, source.height as f32), pos),
-        );
-        let (uv_lower, uv_upper) = source.uv(self.sheet);
-
-        let texture_index = self.sheet.index();
-
-        let tile_vertices = [
-            Vertex {
-                pos: self.adjust(bottom_left),
-                uv: [uv_lower.x, uv_upper.y],
-                tex_idx: texture_index,
-            },
-            Vertex {
-                pos: self.adjust(bottom_right),
-                uv: [uv_upper.x, uv_upper.y],
-                tex_idx: texture_index,
-            },
-            Vertex {
-                pos: self.adjust(top_left),
-                uv: [uv_lower.x, uv_lower.y],
-                tex_idx: texture_index,
-            },
-            Vertex {
-                pos: self.adjust(top_right),
-                uv: [uv_upper.x, uv_lower.y],
-                tex_idx: texture_index,
-            },
-        ];
-
-        let triangle_vertices = [
-            tile_vertices[0],
-            tile_vertices[1],
-            tile_vertices[2],
-            tile_vertices[1],
-            tile_vertices[2],
-            tile_vertices[3],
-        ];
-
-        self.vertices.extend(triangle_vertices);
-    }*/
-
     pub fn finish(&mut self) {
         for vertex in &self.vertices {
             if self.deduplicate {

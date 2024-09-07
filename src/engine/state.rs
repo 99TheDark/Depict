@@ -1,5 +1,6 @@
 use std::{cell::RefCell, iter, rc::Rc, sync::Arc};
 
+use bytemuck::cast_slice;
 use wgpu::{
     Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
     BindGroupLayoutEntry, BindingResource, BindingType, Buffer, Color, CommandEncoderDescriptor,
@@ -25,9 +26,11 @@ use super::{
     properties::{Properties, Size},
     renderer::Renderer,
     shader::Shader,
+    uniforms::{ScaleData, Uniform, Uniforms},
 };
 
 pub(crate) struct State<'a> {
+    pub(crate) size: Size,
     pub(crate) images: Vec<Image>,
     pub(crate) instance: Instance,
     pub(crate) surface: Surface<'a>,
@@ -39,7 +42,8 @@ pub(crate) struct State<'a> {
     vertex_buffer: Buffer,
     index_buffer: Buffer,
     pipeline: RenderPipeline,
-    bind_group: BindGroup,
+    texture_bind_group: BindGroup,
+    uniforms: Uniforms,
     pub(crate) properties: Properties,
     pub(crate) mouse: Tracker<Mouse>,
     pub(crate) keyboard: Tracker<Keyboard>,
@@ -113,13 +117,13 @@ impl<'a> State<'a> {
 
         system.borrow_mut().init(&mut ctx);
 
-        let mut bind_layout_entries = Vec::with_capacity(ctx.image_count * 2);
-        let mut bind_entries = Vec::with_capacity(ctx.image_count * 2);
+        let mut texture_bind_group_layout_entries = Vec::with_capacity(ctx.image_count * 2);
+        let mut texture_bind_entries = Vec::with_capacity(ctx.image_count * 2);
 
         for (idx, texture) in ctx.images.iter().enumerate() {
             let i = idx * 2;
 
-            bind_layout_entries.push(BindGroupLayoutEntry {
+            texture_bind_group_layout_entries.push(BindGroupLayoutEntry {
                 binding: i as u32,
                 visibility: ShaderStages::FRAGMENT,
                 ty: BindingType::Texture {
@@ -129,18 +133,18 @@ impl<'a> State<'a> {
                 },
                 count: None,
             });
-            bind_layout_entries.push(BindGroupLayoutEntry {
+            texture_bind_group_layout_entries.push(BindGroupLayoutEntry {
                 binding: i as u32 + 1,
                 visibility: ShaderStages::FRAGMENT,
                 ty: BindingType::Sampler(SamplerBindingType::Filtering),
                 count: None,
             });
 
-            bind_entries.push(BindGroupEntry {
+            texture_bind_entries.push(BindGroupEntry {
                 binding: i as u32,
                 resource: BindingResource::TextureView(&texture.view),
             });
-            bind_entries.push(BindGroupEntry {
+            texture_bind_entries.push(BindGroupEntry {
                 binding: i as u32 + 1,
                 resource: BindingResource::Sampler(&texture.sampler),
             });
@@ -148,18 +152,54 @@ impl<'a> State<'a> {
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-                entries: &bind_layout_entries[..],
+                entries: &texture_bind_group_layout_entries[..],
                 label: Some("Texture Bind Group Layout"),
             });
 
-        let bind_group = device.create_bind_group(&BindGroupDescriptor {
+        let texture_bind_group = device.create_bind_group(&BindGroupDescriptor {
             layout: &texture_bind_group_layout,
-            entries: &bind_entries[..],
-            label: Some("Bind Group"),
+            entries: &texture_bind_entries[..],
+            label: Some("Texture Bind Group"),
         });
 
+        let mut uniform_bind_group_layout_entries = Vec::new();
+        let mut uniform_bind_group_entries = Vec::new();
+
+        let scale_uniform = Uniform::new(
+            &device,
+            ScaleData {
+                scale: [1.0 / size.width as f32, 1.0 / size.height as f32],
+            },
+            Some("Scale Uniform"),
+        );
+
+        scale_uniform.register(
+            &mut uniform_bind_group_layout_entries,
+            &mut uniform_bind_group_entries,
+        );
+
+        let uniform_bind_group_layout =
+            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+                entries: &uniform_bind_group_layout_entries[..],
+                label: Some("Uniform Bind Group Layout"),
+            });
+
+        let uniform_bind_group = device.create_bind_group(&BindGroupDescriptor {
+            layout: &uniform_bind_group_layout,
+            entries: &uniform_bind_group_entries[..],
+            label: Some("Uniform Bind Group"),
+        });
+
+        let uniforms = Uniforms {
+            bind_group: uniform_bind_group,
+            scale: scale_uniform,
+        };
+
         let shader = Shader::new("shaders/shader.wgsl", config.format);
-        let pipeline = shader.build(&device, &texture_bind_group_layout);
+        let pipeline = shader.build(
+            &device,
+            &[&texture_bind_group_layout, &uniform_bind_group_layout],
+        );
 
         let properties = Properties { size, aspect };
 
@@ -170,6 +210,7 @@ impl<'a> State<'a> {
         let (count, vertex_buffer, index_buffer) = renderer.build(&device);
 
         State {
+            size,
             images: ctx.images,
             instance,
             surface,
@@ -181,7 +222,8 @@ impl<'a> State<'a> {
             vertex_buffer,
             index_buffer,
             pipeline,
-            bind_group,
+            texture_bind_group,
+            uniforms,
             properties,
             mouse,
             keyboard,
@@ -199,6 +241,8 @@ impl<'a> State<'a> {
         let mut renderer = Renderer::new();
         self.system.borrow_mut().render(&mut Context {
             step: ContextStep::Render,
+            size: self.size,
+            window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             renderer: Some(&mut renderer),
@@ -212,6 +256,8 @@ impl<'a> State<'a> {
     pub fn update(&mut self) {
         self.system.borrow_mut().update(&mut Context {
             step: ContextStep::Update,
+            size: self.size,
+            window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             renderer: None,
@@ -253,7 +299,8 @@ impl<'a> State<'a> {
         {
             let mut render_pass = encoder.begin_render_pass(&render_pass_descriptor);
             render_pass.set_pipeline(&self.pipeline);
-            render_pass.set_bind_group(0, &self.bind_group, &[]);
+            render_pass.set_bind_group(0, &self.texture_bind_group, &[]);
+            render_pass.set_bind_group(1, &self.uniforms.bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint16);
 
@@ -272,6 +319,17 @@ impl<'a> State<'a> {
             (self.config.width, self.config.height) = (new_size.width, new_size.height);
 
             self.surface.configure(&self.device, &self.config);
+
+            // This code is gross but idk how to fix it
+            self.uniforms
+                .scale
+                .data
+                .update(new_size.width, new_size.height);
+            self.queue.write_buffer(
+                &self.uniforms.scale.buffer,
+                0,
+                cast_slice(&[self.uniforms.scale.data]),
+            );
         }
     }
 

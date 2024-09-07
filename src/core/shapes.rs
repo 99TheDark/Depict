@@ -22,19 +22,19 @@ shape!(
 impl Renderable for Rectangle {
     fn render(&self, batch: &mut RenderBatch) {
         batch.triangle(
-            Vertex::new(self.x, self.y, 0.0, 1.0, &self.background),
-            Vertex::new(self.x + self.width, self.y, 1.0, 1.0, &self.background),
-            Vertex::new(self.x, self.y + self.height, 0.0, 0.0, &self.background),
+            Vertex::new(self.x, self.y, 0.0, 0.0, &self.background),
+            Vertex::new(self.x + self.width, self.y, 1.0, 0.0, &self.background),
+            Vertex::new(self.x, self.y + self.height, 0.0, 1.0, &self.background),
         );
 
         batch.triangle(
-            Vertex::new(self.x + self.width, self.y, 1.0, 1.0, &self.background),
-            Vertex::new(self.x, self.y + self.height, 0.0, 0.0, &self.background),
+            Vertex::new(self.x + self.width, self.y, 1.0, 0.0, &self.background),
+            Vertex::new(self.x, self.y + self.height, 0.0, 1.0, &self.background),
             Vertex::new(
                 self.x + self.width,
                 self.y + self.height,
                 1.0,
-                0.0,
+                1.0,
                 &self.background,
             ),
         );

@@ -27,7 +27,7 @@ impl<'a> System<'a> for Game {
 
     fn render(&mut self, ctx: &mut Context) {
         ctx.draw(
-            &Rectangle::new(0.0, 0.0, 0.5, 0.5).with_background(Background::Image(self.grass)),
+            &Rectangle::new(0.0, 0.0, 500.0, 500.0).with_background(Background::Image(self.grass)),
         );
     }
 }
