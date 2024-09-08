@@ -122,6 +122,20 @@ impl<'a> Context<'a> {
         batch.finish();
     }
 
+    pub fn draw_all(&mut self, renderables: &[&dyn Renderable]) {
+        if self.step != ContextStep::Render {
+            panic!("Can only call renderable methods like draw_all in the render step, within\n\nfn render(&mut self, ctx: &mut RenderContext)");
+        }
+
+        let renderer = self.renderer.as_mut().unwrap();
+
+        let mut batch = renderer.batch(true, &self.properties); // TODO: Get rid of properties here too
+        for renderable in renderables {
+            renderable.render(&mut batch);
+        }
+        batch.finish();
+    }
+
     pub fn show_cursor(&mut self) {
         self.window.set_cursor_visible(true);
     }

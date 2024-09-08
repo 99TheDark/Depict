@@ -19,7 +19,7 @@ fn vs_main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     out.color = in.color;
     out.uv = in.uv;
-    out.pos = vec4<f32>(in.pos * scale, 0.0, 1.0);
+    out.pos = vec4<f32>(in.pos * scale * 2.0 + vec2<f32>(-1.0, 1.0), 0.0, 1.0);
     out.tex_idx = in.tex_idx;
 
     return out;
@@ -47,7 +47,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             return textureSample(texture1, sampler1, in.uv);
         }
         default {
-            return in.color;
+            return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+            // return in.color;
         }
     }
 }

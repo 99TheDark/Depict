@@ -58,7 +58,6 @@ impl<'a> State<'a> {
         settings: &Settings,
     ) -> State<'a> {
         let size = Size::from_physical(window.inner_size());
-        let aspect = size.width as f32 / size.height as f32;
 
         let instance_descriptor = InstanceDescriptor {
             backends: Backends::all(),
@@ -201,7 +200,10 @@ impl<'a> State<'a> {
             &[&texture_bind_group_layout, &uniform_bind_group_layout],
         );
 
-        let properties = Properties { size, aspect };
+        let properties = Properties {
+            size,
+            aspect: size.aspect(), // Could just be combined...
+        };
 
         let mouse = Tracker::new(Mouse::new());
         let keyboard = Tracker::new(Keyboard::new());

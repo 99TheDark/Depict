@@ -90,6 +90,6 @@ impl Color {
     }
 
     pub fn to_array(&self) -> [f32; 4] {
-        [self.red, self.green, self.blue, 1.0 - self.alpha]
+        [self.red, self.green, self.blue, self.alpha]
     }
 }

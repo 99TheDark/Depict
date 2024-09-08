@@ -29,6 +29,10 @@ impl Size {
             height: self.height,
         })
     }
+
+    pub fn aspect(&self) -> f32 {
+        self.width as f32 / self.height as f32
+    }
 }
 
 // TODO: Remove

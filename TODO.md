@@ -1,4 +1,5 @@
 # TODO
-- Better coord system
-- Keep aspect ratio
 - Clipping
+- Scale with size
+- Transformations
+- Convert mouse to coordinate system

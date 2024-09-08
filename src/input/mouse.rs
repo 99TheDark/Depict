@@ -7,7 +7,7 @@ use winit::{
 #[derive(Debug, Copy, Clone)]
 pub struct Mouse {
     pub inside: bool,
-    pub pos: Option<Vec2>,
+    pub pos: Vec2,
     pub state: ElementState,
     pub button: MouseButton,
     pub delta: MouseScrollDelta,
@@ -18,7 +18,7 @@ impl Mouse {
     pub fn new() -> Mouse {
         Mouse {
             inside: false,
-            pos: None,
+            pos: Vec2::new(0.0, 0.0),
             state: ElementState::Released,
             button: MouseButton::Left,
             delta: MouseScrollDelta::PixelDelta(PhysicalPosition::new(0.0, 0.0)),
@@ -33,13 +33,13 @@ impl Mouse {
     pub fn update(&mut self, event: &WindowEvent) {
         match event {
             WindowEvent::CursorMoved { position, .. } => {
-                self.pos = Some(Vec2::new(position.x as f32, position.y as f32));
+                self.pos.x = position.x as f32;
+                self.pos.y = position.y as f32;
             }
             WindowEvent::CursorEntered { .. } => {
                 self.inside = true;
             }
             WindowEvent::CursorLeft { .. } => {
-                self.pos = None;
                 self.inside = false;
             }
             WindowEvent::MouseInput { state, button, .. } => {
