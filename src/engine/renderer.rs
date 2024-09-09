@@ -5,7 +5,9 @@ use wgpu::{
     Buffer, BufferUsages, Device,
 };
 
-use super::{properties::Properties, shader::Vertex};
+use crate::graphics::asset::Assets;
+
+use super::shader::Vertex;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TransformationEffect {
@@ -14,10 +16,10 @@ pub enum TransformationEffect {
 }
 
 #[derive(Debug)]
-pub struct RenderBatch<'a> {
+pub(crate) struct RenderBatch<'a> {
     pub deduplicate: bool,
+    pub(crate) assets: &'a Assets,
     renderer: &'a mut Renderer,
-    properties: &'a Properties,
     vertices: Vec<Vertex>,
     absolute_transformation: Affine2,
     relative_transformation: Affine2,
@@ -96,7 +98,7 @@ impl<'a> RenderBatch<'a> {
 }
 
 #[derive(Debug)]
-pub struct Renderer {
+pub(crate) struct Renderer {
     vertices: Vec<Vertex>,
     indices: Vec<u16>,
     count: u32,
@@ -111,11 +113,11 @@ impl Renderer {
         }
     }
 
-    pub fn batch<'a>(&'a mut self, deduplicate: bool, properties: &'a Properties) -> RenderBatch {
+    pub fn batch<'a>(&'a mut self, assets: &'a Assets, deduplicate: bool) -> RenderBatch {
         RenderBatch {
             deduplicate,
+            assets,
             renderer: self,
-            properties,
             vertices: Vec::new(),
             absolute_transformation: Affine2::IDENTITY,
             relative_transformation: Affine2::IDENTITY,

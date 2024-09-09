@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use image::{DynamicImage, GenericImageView};
 use rectangle_pack::{
@@ -13,8 +13,9 @@ use wgpu::{
 
 use super::image::Image;
 
+#[derive(Debug)]
 pub(crate) struct Atlas {
-    pub images: Vec<Image>,
+    pub images: HashMap<u32, Image>,
     pub width: u32,
     pub height: u32,
     pub texture: Texture,
@@ -30,6 +31,7 @@ impl Atlas {
         height: u32,
         image_sources: Vec<(u32, DynamicImage)>,
     ) -> Self {
+        // Eventually start with smaller images
         let mut rectangles = GroupedRectsToPlace::<u32>::new();
         for (id, image) in &image_sources {
             let (width, height) = image.dimensions();
@@ -49,33 +51,19 @@ impl Atlas {
         .unwrap();
 
         let mut rgba = vec![0; (width * height * 4) as usize];
-        /*for (id, (_bin_id, location)) in placements.packed_locations() {
-            images.push(Image {
-                id: *id,
-                u: location.x() as f32 / width as f32,
-                v: location.y() as f32 / height as f32,
-                width: location.width() as f32 / width as f32,
-                height: location.height() as f32 / height as f32,
-            });
-
-            for y in 0..location.height() {
-                for x in 0..location.width() {
-                    let src_idx = (x + y * );
-                    let dst_idx =
-                        ((location.x() + x) + (location.y() + y) * location.width()) as usize * 4;
-                }
-            }
-        }*/
-        let mut images = Vec::new();
+        let mut images = HashMap::new();
         for (id, image) in &image_sources {
             let (_bin_id, location) = placements.packed_locations().get(&id).unwrap();
-            images.push(Image {
-                id: *id,
-                u: location.x() as f32 / width as f32,
-                v: location.y() as f32 / height as f32,
-                width: location.width() as f32 / width as f32,
-                height: location.height() as f32 / height as f32,
-            });
+            images.insert(
+                *id,
+                Image {
+                    id: *id,
+                    u: location.x() as f32 / width as f32,
+                    v: location.y() as f32 / height as f32,
+                    width: location.width() as f32 / width as f32,
+                    height: location.height() as f32 / height as f32,
+                },
+            );
 
             let bytes = image.clone().into_rgba8().to_vec();
             for y in 0..location.height() {
@@ -144,5 +132,9 @@ impl Atlas {
             view,
             sampler,
         }
+    }
+
+    pub fn get(&self, id: u32) -> &Image {
+        &self.images[&id]
     }
 }

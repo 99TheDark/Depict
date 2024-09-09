@@ -18,7 +18,7 @@ use crate::{
         settings::Settings,
         system::System,
     },
-    graphics::atlas::Atlas,
+    graphics::{asset::Assets, atlas::Atlas},
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
 
@@ -31,8 +31,7 @@ use super::{
 
 pub(crate) struct State<'a> {
     pub(crate) size: Size,
-    // pub(crate) image_atlas: Atlas,
-    // pub(crate) font_atlas: Atlas,
+    pub(crate) assets: Assets,
     pub(crate) instance: Instance,
     pub(crate) surface: Surface<'a>,
     pub(crate) device: Device,
@@ -60,29 +59,32 @@ impl<'a> State<'a> {
     ) -> State<'a> {
         let size = Size::from_physical(window.inner_size());
 
-        let instance_descriptor = InstanceDescriptor {
+        let instance = Instance::new(InstanceDescriptor {
             backends: Backends::all(),
             ..Default::default()
-        };
-        let instance = Instance::new(instance_descriptor);
+        });
 
         let target = unsafe { SurfaceTargetUnsafe::from_window(&window) }.unwrap();
         let surface = unsafe { instance.create_surface_unsafe(target) }.unwrap();
 
-        let adapter_descriptor = RequestAdapterOptionsBase {
-            power_preference: PowerPreference::default(),
-            compatible_surface: Some(&surface),
-            force_fallback_adapter: false,
-        };
-        let adapter = instance.request_adapter(&adapter_descriptor).await.unwrap();
+        let adapter = instance
+            .request_adapter(&RequestAdapterOptionsBase {
+                power_preference: PowerPreference::default(),
+                compatible_surface: Some(&surface),
+                force_fallback_adapter: false,
+            })
+            .await
+            .unwrap();
 
-        let device_descriptor = DeviceDescriptor {
-            required_features: Features::empty(),
-            required_limits: Limits::default(),
-            label: Some("Device"),
-        };
         let (device, queue) = adapter
-            .request_device(&device_descriptor, None)
+            .request_device(
+                &DeviceDescriptor {
+                    required_features: Features::empty(),
+                    required_limits: Limits::default(),
+                    label: Some("Device"),
+                },
+                None,
+            )
             .await
             .unwrap();
 
@@ -110,82 +112,12 @@ impl<'a> State<'a> {
         let mut ctx = PartialContext {
             sources: Vec::new(),
             // fonts: Vec::new(),
-            device: &device,
-            queue: &queue,
             size,
         };
 
         system.borrow_mut().init(&mut ctx);
 
-        /*let mut texture_bind_group_layout_entries = Vec::with_capacity(ctx.images.len() * 2);
-        let mut texture_bind_entries = Vec::with_capacity(ctx.images.len() * 2);
-
-        for (idx, texture) in ctx.images.iter().enumerate() {
-            let i = idx * 2;
-
-            texture_bind_group_layout_entries.push(BindGroupLayoutEntry {
-                binding: i as u32,
-                visibility: ShaderStages::FRAGMENT,
-                ty: BindingType::Texture {
-                    multisampled: false,
-                    view_dimension: TextureViewDimension::D2Array,
-                    sample_type: TextureSampleType::Float { filterable: true },
-                },
-                count: None,
-            });
-            texture_bind_group_layout_entries.push(BindGroupLayoutEntry {
-                binding: i as u32 + 1,
-                visibility: ShaderStages::FRAGMENT,
-                ty: BindingType::Sampler(SamplerBindingType::Filtering),
-                count: None,
-            });
-
-            texture_bind_entries.push(BindGroupEntry {
-                binding: i as u32,
-                resource: BindingResource::TextureView(&texture.view),
-            });
-            texture_bind_entries.push(BindGroupEntry {
-                binding: i as u32 + 1,
-                resource: BindingResource::Sampler(&texture.sampler),
-            });
-        }
-
-        let texture_bind_group_layout =
-            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-                entries: &texture_bind_group_layout_entries[..],
-                label: Some("Texture Bind Group Layout"),
-            });
-
-        let texture_bind_group = device.create_bind_group(&BindGroupDescriptor {
-            layout: &texture_bind_group_layout,
-            entries: &texture_bind_entries[..],
-            label: Some("Texture Bind Group"),
-        });*/
-
-        /*let texture = device.create_texture(&TextureDescriptor {
-            size,
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: TextureDimension::D2,
-            format: TextureFormat::Rgba8UnormSrgb,
-            usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
-            label: None,
-            view_formats: &[],
-        });
-
-        let texture_view = texture.create_view(&TextureViewDescriptor::default());
-
-        let texture_sampler = device.create_sampler(&SamplerDescriptor {
-            address_mode_u: AddressMode::ClampToEdge,
-            address_mode_v: AddressMode::ClampToEdge,
-            address_mode_w: AddressMode::ClampToEdge,
-            mag_filter: FilterMode::Nearest,
-            min_filter: FilterMode::Nearest,
-            mipmap_filter: FilterMode::Nearest,
-            ..Default::default()
-        });*/
-
-        let max_size = Limits::default().max_texture_dimension_2d * 0 + 32;
+        let max_size = Limits::default().max_texture_dimension_2d * 0 + 16;
         let image_atlas = Atlas::new(&device, &queue, max_size, max_size, ctx.sources);
 
         let texture_bind_group_layout =
@@ -225,6 +157,10 @@ impl<'a> State<'a> {
                 },
             ],
         });
+
+        let assets = Assets {
+            images: image_atlas,
+        };
 
         let mut uniform_layout_entries = Vec::new();
         let mut uniform_entries = Vec::new();
@@ -275,8 +211,7 @@ impl<'a> State<'a> {
 
         State {
             size,
-            // image_atlas,
-            // font_atlas,
+            assets,
             instance,
             surface,
             device,
@@ -307,6 +242,7 @@ impl<'a> State<'a> {
         self.system.borrow_mut().render(&mut Context {
             step: ContextStep::Render,
             size: self.size,
+            assets: &self.assets,
             window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
@@ -322,6 +258,7 @@ impl<'a> State<'a> {
         self.system.borrow_mut().update(&mut Context {
             step: ContextStep::Update,
             size: self.size,
+            assets: &self.assets,
             window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
@@ -336,13 +273,15 @@ impl<'a> State<'a> {
 
         let drawable = self.surface.get_current_texture()?;
 
-        let image_view_descriptor = TextureViewDescriptor::default();
-        let image_view = drawable.texture.create_view(&image_view_descriptor);
+        let image_view = drawable
+            .texture
+            .create_view(&TextureViewDescriptor::default());
 
-        let encoder_descriptor = CommandEncoderDescriptor {
-            label: Some("Command Encoder"),
-        };
-        let mut encoder = self.device.create_command_encoder(&encoder_descriptor);
+        let mut encoder = self
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor {
+                label: Some("Command Encoder"),
+            });
 
         let color_attatchment = RenderPassColorAttachment {
             view: &image_view,
@@ -353,19 +292,20 @@ impl<'a> State<'a> {
             },
         };
 
-        let render_pass_descriptor = RenderPassDescriptor {
-            label: Some("Render Pass"),
-            color_attachments: &[Some(color_attatchment)],
-            depth_stencil_attachment: None,
-            occlusion_query_set: None,
-            timestamp_writes: None,
-        };
-
         {
-            let mut render_pass = encoder.begin_render_pass(&render_pass_descriptor);
+            let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
+                label: Some("Render Pass"),
+                color_attachments: &[Some(color_attatchment)],
+                depth_stencil_attachment: None,
+                occlusion_query_set: None,
+                timestamp_writes: None,
+            });
+
             render_pass.set_pipeline(&self.pipeline);
+
             render_pass.set_bind_group(0, &self.texture_bind_group, &[]);
             render_pass.set_bind_group(1, &self.uniforms.bind_group, &[]);
+
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint16);
 

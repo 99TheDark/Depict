@@ -11,6 +11,7 @@ use wgpu::{
 };
 
 use crate::core::properties::Background;
+use crate::graphics::color::Color;
 
 struct Attributes {
     pub attributes: Vec<VertexAttribute>,
@@ -38,29 +39,21 @@ impl Attributes {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, Pod, Zeroable, PartialEq)]
+#[derive(Debug, Copy, Clone, Pod, Zeroable, PartialEq)]
 pub struct Vertex {
     pub pos: [f32; 2],
     pub color: [f32; 4],
     pub uv: [f32; 2],
-    pub tex_idx: u32,
+    pub atlas_idx: u32,
 }
 
 impl Vertex {
-    pub fn new(x: f32, y: f32, u: f32, v: f32, background: &Background) -> Self {
-        match background {
-            Background::Color(color) => Self {
-                pos: [x, y],
-                color: color.to_array(),
-                uv: [0.0, 0.0],
-                tex_idx: u32::MAX,
-            },
-            Background::Image(image) => Self {
-                pos: [x, y],
-                color: [0.0, 0.0, 0.0, 0.0],
-                uv: [u, v],
-                tex_idx: image.id * 0,
-            },
+    pub fn new(x: f32, y: f32, u: f32, v: f32, color: Color, atlas_idx: u32) -> Self {
+        Self {
+            pos: [x, y],
+            color: color.to_array(),
+            uv: [u, v],
+            atlas_idx,
         }
     }
 

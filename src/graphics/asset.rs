@@ -1,6 +1,14 @@
 use std::{fmt::Debug, marker::PhantomData};
 
-pub(crate) trait AssetType {}
+use super::atlas::Atlas;
+
+#[derive(Debug)]
+pub(crate) struct Assets {
+    pub images: Atlas,
+    // pub fonts: Atlas,
+}
+
+pub trait AssetType {}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Image;

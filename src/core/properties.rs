@@ -1,13 +1,12 @@
 use crate::graphics::{
-    asset::{self, Asset},
+    asset::{Asset, Image},
     color::Color,
-    image::Image,
 };
 
 #[derive(Debug, Copy, Clone)]
 pub enum Background {
     Color(Color),
-    Image(Asset<asset::Image>),
+    Image(Asset<Image>),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]

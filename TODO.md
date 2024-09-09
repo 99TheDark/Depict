@@ -4,8 +4,6 @@
 - Transformations
 - Make mouse coords scale
 - Text generation
-- Fix images/assets
 - Comment documentation
-- Change from nearest neighbor to something else in settings
-- Add image atlases
-    - Figure out what to do when out of space
+- Change from nearest neighbor to something else in settings (or image settings)
+- Figure out what to do when out of space in atlas
