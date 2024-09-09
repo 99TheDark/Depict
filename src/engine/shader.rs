@@ -53,13 +53,13 @@ impl Vertex {
                 pos: [x, y],
                 color: color.to_array(),
                 uv: [0.0, 0.0],
-                tex_idx: 0,
+                tex_idx: u32::MAX,
             },
             Background::Image(image) => Self {
                 pos: [x, y],
                 color: [0.0, 0.0, 0.0, 0.0],
                 uv: [u, v],
-                tex_idx: image.id,
+                tex_idx: image.id * 0,
             },
         }
     }

@@ -1,9 +1,13 @@
-use super::{asset::Asset, color::Color};
+use crate::graphics::{
+    asset::{self, Asset},
+    color::Color,
+    image::Image,
+};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Background {
     Color(Color),
-    Image(Asset),
+    Image(Asset<asset::Image>),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]

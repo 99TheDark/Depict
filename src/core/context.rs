@@ -1,11 +1,7 @@
 use std::sync::Arc;
 
-use image::GenericImageView;
-use wgpu::{
-    AddressMode, Device, Extent3d, FilterMode, ImageCopyTexture, ImageDataLayout, Origin3d, Queue,
-    SamplerDescriptor, TextureAspect, TextureDescriptor, TextureDimension, TextureFormat,
-    TextureUsages, TextureViewDescriptor,
-};
+use image::DynamicImage;
+use wgpu::{Device, Queue};
 use winit::window::Window;
 
 use crate::{
@@ -13,27 +9,31 @@ use crate::{
         properties::{Properties, Size},
         renderer::Renderer,
     },
+    graphics::{
+        asset::{self, Asset},
+        font::Font,
+    },
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
 
-use super::{asset::Asset, image::Image, render::Renderable};
+use super::render::Renderable;
 
 pub struct PartialContext<'a> {
-    pub(crate) image_count: usize,
-    pub(crate) images: Vec<Image>,
+    pub(crate) sources: Vec<(u32, DynamicImage)>,
+    // pub(crate) fonts: Vec<Font>,
     pub(crate) device: &'a Device,
     pub(crate) queue: &'a Queue,
     pub size: Size,
 }
 
 impl<'a> PartialContext<'a> {
-    pub fn image(&mut self, bytes: &[u8]) -> Asset {
-        self.image_count += 1;
-
+    pub fn image(&mut self, bytes: &[u8]) -> Asset<asset::Image> {
         let image = image::load_from_memory(bytes).unwrap();
-        let id = self.image_count as u32;
+        let id = self.sources.len() as u32;
 
-        let rgba = image.to_rgba8();
+        self.sources.push((id, image));
+
+        /*let rgba = image.to_rgba8();
         let dimensions = image.dimensions();
 
         let size = Extent3d {
@@ -41,6 +41,7 @@ impl<'a> PartialContext<'a> {
             height: dimensions.1,
             depth_or_array_layers: 1,
         };
+
         let texture = self.device.create_texture(&TextureDescriptor {
             size,
             mip_level_count: 1,
@@ -68,7 +69,7 @@ impl<'a> PartialContext<'a> {
             size,
         );
 
-        let view = texture.create_view(&TextureViewDescriptor::default());
+        /*let view = texture.create_view(&TextureViewDescriptor::default());
 
         let sampler = self.device.create_sampler(&SamplerDescriptor {
             address_mode_u: AddressMode::ClampToEdge,
@@ -78,17 +79,26 @@ impl<'a> PartialContext<'a> {
             min_filter: FilterMode::Nearest,
             mipmap_filter: FilterMode::Nearest,
             ..Default::default()
-        });
+        });*/
 
         self.images.push(Image {
             image,
             id,
-            view,
-            sampler,
+            // view,
+            // sampler,
         });
 
-        Asset { id }
+        Asset::new(id)*/
+
+        Asset::new(id)
     }
+
+    /*pub fn font(&mut self, bytes: &[u8]) -> Asset<asset::Font> {
+        let roboto_regular =
+            fontdue::Font::from_bytes(bytes, fontdue::FontSettings::default()).unwrap();
+
+        roboto_regular.rasterize(character, px)
+    }*/
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

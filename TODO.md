@@ -2,4 +2,10 @@
 - Clipping
 - Scale with size
 - Transformations
-- Convert mouse to coordinate system
+- Make mouse coords scale
+- Text generation
+- Fix images/assets
+- Comment documentation
+- Change from nearest neighbor to something else in settings
+- Add image atlases
+    - Figure out what to do when out of space

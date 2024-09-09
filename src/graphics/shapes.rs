@@ -1,12 +1,14 @@
 use depict_macro::shape;
 
-use crate::engine::{renderer::RenderBatch, shader::Vertex};
-
-use super::{
-    color::Color,
-    properties::{Background, Border},
-    render::Renderable,
+use crate::{
+    core::{
+        properties::{Background, Border},
+        render::Renderable,
+    },
+    engine::{renderer::RenderBatch, shader::Vertex},
 };
+
+use super::color::Color;
 
 shape!(
     pub struct Rectangle {

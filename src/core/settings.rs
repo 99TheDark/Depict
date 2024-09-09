@@ -1,8 +1,6 @@
 use winit::{dpi::Position, window::WindowAttributes};
 
-use crate::engine::properties::Size;
-
-use super::color::Color;
+use crate::{engine::properties::Size, graphics::color::Color};
 
 pub struct Settings {
     pub background: Color,

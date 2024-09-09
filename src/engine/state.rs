@@ -15,10 +15,10 @@ use winit::window::Window;
 use crate::{
     core::{
         context::{Context, ContextStep, PartialContext},
-        image::Image,
         settings::Settings,
         system::System,
     },
+    graphics::atlas::Atlas,
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
 
@@ -31,7 +31,8 @@ use super::{
 
 pub(crate) struct State<'a> {
     pub(crate) size: Size,
-    pub(crate) images: Vec<Image>,
+    // pub(crate) image_atlas: Atlas,
+    // pub(crate) font_atlas: Atlas,
     pub(crate) instance: Instance,
     pub(crate) surface: Surface<'a>,
     pub(crate) device: Device,
@@ -107,8 +108,8 @@ impl<'a> State<'a> {
         surface.configure(&device, &config);
 
         let mut ctx = PartialContext {
-            image_count: 0,
-            images: Vec::new(),
+            sources: Vec::new(),
+            // fonts: Vec::new(),
             device: &device,
             queue: &queue,
             size,
@@ -116,8 +117,8 @@ impl<'a> State<'a> {
 
         system.borrow_mut().init(&mut ctx);
 
-        let mut texture_bind_group_layout_entries = Vec::with_capacity(ctx.image_count * 2);
-        let mut texture_bind_entries = Vec::with_capacity(ctx.image_count * 2);
+        /*let mut texture_bind_group_layout_entries = Vec::with_capacity(ctx.images.len() * 2);
+        let mut texture_bind_entries = Vec::with_capacity(ctx.images.len() * 2);
 
         for (idx, texture) in ctx.images.iter().enumerate() {
             let i = idx * 2;
@@ -127,7 +128,7 @@ impl<'a> State<'a> {
                 visibility: ShaderStages::FRAGMENT,
                 ty: BindingType::Texture {
                     multisampled: false,
-                    view_dimension: TextureViewDimension::D2,
+                    view_dimension: TextureViewDimension::D2Array,
                     sample_type: TextureSampleType::Float { filterable: true },
                 },
                 count: None,
@@ -159,10 +160,74 @@ impl<'a> State<'a> {
             layout: &texture_bind_group_layout,
             entries: &texture_bind_entries[..],
             label: Some("Texture Bind Group"),
+        });*/
+
+        /*let texture = device.create_texture(&TextureDescriptor {
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8UnormSrgb,
+            usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+            label: None,
+            view_formats: &[],
         });
 
-        let mut uniform_bind_group_layout_entries = Vec::new();
-        let mut uniform_bind_group_entries = Vec::new();
+        let texture_view = texture.create_view(&TextureViewDescriptor::default());
+
+        let texture_sampler = device.create_sampler(&SamplerDescriptor {
+            address_mode_u: AddressMode::ClampToEdge,
+            address_mode_v: AddressMode::ClampToEdge,
+            address_mode_w: AddressMode::ClampToEdge,
+            mag_filter: FilterMode::Nearest,
+            min_filter: FilterMode::Nearest,
+            mipmap_filter: FilterMode::Nearest,
+            ..Default::default()
+        });*/
+
+        let max_size = Limits::default().max_texture_dimension_2d * 0 + 32;
+        let image_atlas = Atlas::new(&device, &queue, max_size, max_size, ctx.sources);
+
+        let texture_bind_group_layout =
+            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+                label: Some("Texture Bind Group Layout"),
+                entries: &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: TextureViewDimension::D2,
+                            sample_type: TextureSampleType::Float { filterable: true },
+                        },
+                        count: None,
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+            });
+
+        let texture_bind_group = device.create_bind_group(&BindGroupDescriptor {
+            label: Some("Texture Bind Group"),
+            layout: &texture_bind_group_layout,
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureView(&image_atlas.view),
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::Sampler(&image_atlas.sampler),
+                },
+            ],
+        });
+
+        let mut uniform_layout_entries = Vec::new();
+        let mut uniform_entries = Vec::new();
 
         let scale_uniform = Uniform::new(
             &device,
@@ -172,20 +237,17 @@ impl<'a> State<'a> {
             Some("Scale Uniform"),
         );
 
-        scale_uniform.register(
-            &mut uniform_bind_group_layout_entries,
-            &mut uniform_bind_group_entries,
-        );
+        scale_uniform.register(&mut uniform_layout_entries, &mut uniform_entries);
 
         let uniform_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-                entries: &uniform_bind_group_layout_entries[..],
+                entries: &uniform_layout_entries[..],
                 label: Some("Uniform Bind Group Layout"),
             });
 
         let uniform_bind_group = device.create_bind_group(&BindGroupDescriptor {
             layout: &uniform_bind_group_layout,
-            entries: &uniform_bind_group_entries[..],
+            entries: &uniform_entries[..],
             label: Some("Uniform Bind Group"),
         });
 
@@ -213,7 +275,8 @@ impl<'a> State<'a> {
 
         State {
             size,
-            images: ctx.images,
+            // image_atlas,
+            // font_atlas,
             instance,
             surface,
             device,

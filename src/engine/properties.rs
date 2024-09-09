@@ -12,7 +12,7 @@ impl Size {
         Size { width, height }
     }
 
-    pub fn from_physical(size: PhysicalSize<u32>) -> Self {
+    pub(crate) fn from_physical(size: PhysicalSize<u32>) -> Self {
         Size {
             width: size.width,
             height: size.height,
@@ -23,10 +23,10 @@ impl Size {
         Vec2::new(self.width as f32, self.height as f32)
     }
 
-    pub fn physical(&self) -> winit::dpi::Size {
+    pub(crate) fn physical(&self) -> winit::dpi::Size {
         winit::dpi::Size::Physical(PhysicalSize {
-            width: self.width,
-            height: self.height,
+            width: self.width as u32,
+            height: self.height as u32,
         })
     }
 
