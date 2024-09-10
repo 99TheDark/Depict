@@ -1,11 +1,20 @@
-use std::{fmt::Debug, marker::PhantomData};
+use std::{collections::HashMap, fmt::Debug, marker::PhantomData};
 
-use super::atlas::Atlas;
+use super::{
+    atlas::Atlas,
+    font::{FontEmphasis, FontThickness},
+};
+
+#[derive(Debug)]
+pub(crate) struct FontAsset {
+    pub fonts: HashMap<(FontThickness, FontEmphasis), Font>,
+    pub atlas: Atlas,
+}
 
 #[derive(Debug)]
 pub(crate) struct Assets {
     pub images: Atlas,
-    // pub fonts: Atlas,
+    pub fonts: FontAsset,
 }
 
 pub trait AssetType {}

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, iter, rc::Rc, sync::Arc};
+use std::{cell::RefCell, collections::HashMap, iter, rc::Rc, sync::Arc};
 
 use bytemuck::cast_slice;
 use wgpu::{
@@ -18,7 +18,10 @@ use crate::{
         settings::Settings,
         system::System,
     },
-    graphics::{asset::Assets, atlas::Atlas},
+    graphics::{
+        asset::{Assets, FontAsset},
+        atlas::Atlas,
+    },
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
 
@@ -119,6 +122,7 @@ impl<'a> State<'a> {
 
         let max_size = Limits::default().max_texture_dimension_2d;
         let image_atlas = Atlas::new(&device, &queue, max_size, max_size, ctx.img_sources);
+        let font_atlas = Atlas::new(&device, &queue, max_size, max_size, Vec::new());
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
@@ -160,6 +164,10 @@ impl<'a> State<'a> {
 
         let assets = Assets {
             images: image_atlas,
+            fonts: FontAsset {
+                fonts: HashMap::new(),
+                atlas: font_atlas,
+            },
         };
 
         let mut uniform_layout_entries = Vec::new();

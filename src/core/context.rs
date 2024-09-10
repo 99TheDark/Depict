@@ -70,6 +70,7 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
+    // TODO: Make it push to a buffer where images can be updated (like font atlas)
     pub fn draw(&mut self, renderable: &dyn Renderable) {
         if self.step != ContextStep::Render {
             // TODO: Improve errors
