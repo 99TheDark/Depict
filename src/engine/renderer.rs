@@ -16,7 +16,7 @@ pub enum TransformationEffect {
 }
 
 #[derive(Debug)]
-pub(crate) struct RenderBatch<'a> {
+pub struct RenderBatch<'a> {
     pub deduplicate: bool,
     pub(crate) assets: &'a Assets,
     renderer: &'a mut Renderer,
@@ -98,7 +98,7 @@ impl<'a> RenderBatch<'a> {
 }
 
 #[derive(Debug)]
-pub(crate) struct Renderer {
+pub struct Renderer {
     vertices: Vec<Vertex>,
     indices: Vec<u16>,
     count: u32,

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FontThickness {
     Thin,
     ExtraLight,
@@ -13,7 +13,7 @@ pub enum FontThickness {
     Black,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum FontEmphasis {
     Regular,
     Bold,

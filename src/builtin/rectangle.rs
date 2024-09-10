@@ -1,14 +1,10 @@
 use depict_macro::shape;
 
 use crate::{
-    core::{
-        properties::{Background, Border},
-        renderable::Renderable,
-    },
+    core::{properties::Background, renderable::Renderable},
     engine::{renderer::RenderBatch, shader::Vertex},
+    graphics::color::Color,
 };
-
-use super::color::Color;
 
 shape!(
     pub struct Rectangle {
@@ -17,7 +13,7 @@ shape!(
         width: f32,
         height: f32,
         background: Background = Background::Color(Color::CLEAR),
-        border: Border = Border::NONE,
+        // border: Border = Border::NONE,
     }
 );
 

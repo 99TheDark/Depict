@@ -110,15 +110,15 @@ impl<'a> State<'a> {
         surface.configure(&device, &config);
 
         let mut ctx = PartialContext {
-            sources: Vec::new(),
-            // fonts: Vec::new(),
+            img_sources: Vec::new(),
+            font_sources: Vec::new(),
             size,
         };
 
         system.borrow_mut().init(&mut ctx);
 
-        let max_size = Limits::default().max_texture_dimension_2d * 0 + 16;
-        let image_atlas = Atlas::new(&device, &queue, max_size, max_size, ctx.sources);
+        let max_size = Limits::default().max_texture_dimension_2d;
+        let image_atlas = Atlas::new(&device, &queue, max_size, max_size, ctx.img_sources);
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
@@ -247,7 +247,6 @@ impl<'a> State<'a> {
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             renderer: Some(&mut renderer),
-            properties: &self.properties,
             window: self.window.clone(),
         });
 
@@ -263,7 +262,6 @@ impl<'a> State<'a> {
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             renderer: None,
-            properties: &self.properties,
             window: self.window.clone(),
         });
     }
