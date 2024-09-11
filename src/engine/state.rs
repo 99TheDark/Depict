@@ -247,7 +247,7 @@ impl<'a> State<'a> {
 
     fn build(&mut self) -> (u32, Buffer, Buffer) {
         let mut renderer = Renderer::new();
-        self.system.borrow_mut().render(&mut Context {
+        let mut ctx = Context {
             step: ContextStep::Render,
             size: self.size,
             assets: &self.assets,
@@ -255,8 +255,12 @@ impl<'a> State<'a> {
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             renderer: Some(&mut renderer),
+            renderables: Vec::new(),
             window: self.window.clone(),
-        });
+        };
+
+        self.system.borrow_mut().render(&mut ctx);
+        ctx.render();
 
         renderer.build(&self.device)
     }
@@ -270,6 +274,7 @@ impl<'a> State<'a> {
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             renderer: None,
+            renderables: Vec::new(),
             window: self.window.clone(),
         });
     }

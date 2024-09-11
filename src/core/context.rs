@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, rc::Rc, sync::Arc};
 
 use fontdue::FontSettings;
 use image::DynamicImage;
@@ -67,35 +67,29 @@ pub struct Context<'a> {
     pub mouse: &'a Tracker<Mouse>,
     pub keyboard: &'a Tracker<Keyboard>,
     pub(crate) renderer: Option<&'a mut Renderer>,
+    pub(crate) renderables: Vec<Box<dyn Renderable + 'static>>,
 }
 
 impl<'a> Context<'a> {
-    // TODO: Make it push to a buffer where images can be updated (like font atlas)
-    pub fn draw(&mut self, renderable: &dyn Renderable) {
+    pub fn draw(&mut self, renderable: impl Renderable + Clone + 'static) {
         if self.step != ContextStep::Render {
             // TODO: Improve errors
             panic!("Can only call renderable methods like draw in the render step, within\n\nfn render(&mut self, ctx: &mut RenderContext)");
         }
 
-        let renderer = self.renderer.as_mut().unwrap();
-
-        let mut batch = renderer.batch(&self.assets, true);
-        renderable.render(&mut batch);
-        batch.finish();
+        self.renderables.push(Box::new(renderable));
     }
 
-    pub fn draw_all(&mut self, renderables: &[&dyn Renderable]) {
+    pub fn draw_all(&mut self, renderables: Vec<impl Renderable + Clone + 'static>) {
         if self.step != ContextStep::Render {
             panic!("Can only call renderable methods like draw_all in the render step, within\n\nfn render(&mut self, ctx: &mut RenderContext)");
         }
 
-        let renderer = self.renderer.as_mut().unwrap();
-
-        let mut batch = renderer.batch(&self.assets, true);
-        for renderable in renderables {
-            renderable.render(&mut batch);
-        }
-        batch.finish();
+        self.renderables.extend(
+            renderables
+                .iter()
+                .map(|r| -> Box<dyn Renderable> { Box::new(r.clone()) }),
+        );
     }
 
     pub fn show_cursor(&mut self) {
@@ -104,5 +98,15 @@ impl<'a> Context<'a> {
 
     pub fn hide_cursor(&mut self) {
         self.window.set_cursor_visible(false)
+    }
+
+    pub(crate) fn render(&mut self) {
+        let renderer = self.renderer.as_mut().unwrap();
+
+        let mut batch = renderer.batch(&self.assets, true);
+        for renderable in &self.renderables {
+            renderable.render(&mut batch);
+        }
+        batch.finish();
     }
 }

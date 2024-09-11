@@ -16,6 +16,7 @@ pub fn shape(item: TokenStream) -> TokenStream {
     let mut defaults = Vec::new();
     let mut fields = Vec::new();
     let mut withs = Vec::new();
+    let mut cloned = Vec::new();
     for field in input.fields {
         let field_name = field.name;
         let field_type = field.typ;
@@ -35,6 +36,7 @@ pub fn shape(item: TokenStream) -> TokenStream {
                 #field_name,
             });
         }
+
         fields.push(quote! {
             #field_name: #field_type,
         });
@@ -44,9 +46,13 @@ pub fn shape(item: TokenStream) -> TokenStream {
                 self
             }
         });
+        cloned.push(quote! {
+            #field_name: self.#field_name,
+        });
     }
 
     let expanded = quote! {
+        #[derive(Debug, Clone)]
         #visibility struct #name {
             #( #fields )*
         }

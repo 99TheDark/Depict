@@ -4,13 +4,12 @@ pub mod engine;
 pub mod graphics;
 pub mod input;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use builtin::{rectangle::Rectangle, text::Text};
 use graphics::{
     asset::{Asset, Font, Image},
     color::Color,
-    font::{FontEmphasis, FontThickness},
 };
 
 use crate::core::{
@@ -39,13 +38,13 @@ impl<'a> System<'a> for Game {
     fn update(&mut self, ctx: &mut Context) {}
 
     fn render(&mut self, ctx: &mut Context) {
-        ctx.draw_all(&[
-            &Rectangle::new(0.0, 0.0, 200.0, 200.0).with_background(Background::Color(Color::BLUE)),
-            &Rectangle::new(ctx.size.width as f32 - 200.0, 0.0, 200.0, 200.0)
+        ctx.draw_all(vec![
+            Rectangle::new(0.0, 0.0, 200.0, 200.0).with_background(Background::Color(Color::BLUE)),
+            Rectangle::new(ctx.size.width as f32 - 200.0, 0.0, 200.0, 200.0)
                 .with_background(Background::Color(Color::BLUE)),
-            &Rectangle::new(0.0, ctx.size.height as f32 - 200.0, 200.0, 200.0)
+            Rectangle::new(0.0, ctx.size.height as f32 - 200.0, 200.0, 200.0)
                 .with_background(Background::Color(Color::BLUE)),
-            &Rectangle::new(
+            Rectangle::new(
                 ctx.size.width as f32 - 200.0,
                 ctx.size.height as f32 - 200.0,
                 200.0,
@@ -54,18 +53,18 @@ impl<'a> System<'a> for Game {
             .with_background(Background::Color(Color::BLUE)),
         ]);
 
-        ctx.draw_all(&[
-            &Rectangle::new(ctx.mouse.pos.x, ctx.mouse.pos.y, 100.0, 100.0)
+        ctx.draw_all(vec![
+            Rectangle::new(ctx.mouse.pos.x, ctx.mouse.pos.y, 100.0, 100.0)
                 .with_background(Background::Image(self.grass)),
-            &Rectangle::new(ctx.mouse.pos.x, ctx.mouse.pos.y + 100.0, 100.0, 100.0)
+            Rectangle::new(ctx.mouse.pos.x, ctx.mouse.pos.y + 100.0, 100.0, 100.0)
                 .with_background(Background::Image(self.dirt)),
-            &Rectangle::new(ctx.mouse.pos.x + 100.0, ctx.mouse.pos.y, 100.0, 100.0)
+            Rectangle::new(ctx.mouse.pos.x + 100.0, ctx.mouse.pos.y, 100.0, 100.0)
                 .with_background(Background::Image(self.brick)),
-            &Rectangle::new(ctx.mouse.pos.x + 200.0, ctx.mouse.pos.y, 100.0, 100.0)
+            Rectangle::new(ctx.mouse.pos.x + 200.0, ctx.mouse.pos.y, 100.0, 100.0)
                 .with_background(Background::Image(self.brick)),
         ]);
 
-        ctx.draw(&Text::new(0.0, 50.0, "Hello".to_string(), self.roboto));
+        ctx.draw(Text::new(0.0, 50.0, "Hello".to_string(), self.roboto));
     }
 }
 

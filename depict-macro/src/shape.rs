@@ -3,7 +3,7 @@ use syn::{
     braced,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token::{self, Impl},
+    token::{self},
     Expr, Ident, Result, Type, Visibility,
 };
 
