@@ -121,8 +121,11 @@ impl<'a> State<'a> {
         system.borrow_mut().init(&mut ctx);
 
         let max_size = Limits::default().max_texture_dimension_2d;
-        let image_atlas = Atlas::new(&device, &queue, max_size, max_size, ctx.img_sources);
-        let font_atlas = Atlas::new(&device, &queue, max_size, max_size, Vec::new());
+
+        let mut image_atlas = Atlas::new(&device, max_size);
+        image_atlas.sources = ctx.img_sources;
+
+        let font_atlas = Atlas::new(&device, max_size);
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
@@ -250,7 +253,7 @@ impl<'a> State<'a> {
         let mut ctx = Context {
             step: ContextStep::Render,
             size: self.size,
-            assets: &self.assets,
+            assets: &mut self.assets,
             window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
@@ -269,7 +272,7 @@ impl<'a> State<'a> {
         self.system.borrow_mut().update(&mut Context {
             step: ContextStep::Update,
             size: self.size,
-            assets: &self.assets,
+            assets: &mut self.assets,
             window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,

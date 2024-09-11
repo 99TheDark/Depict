@@ -15,78 +15,26 @@ use super::image::Image;
 
 #[derive(Debug)]
 pub(crate) struct Atlas {
+    pub sources: Vec<(u32, DynamicImage)>,
     pub images: HashMap<u32, Image>,
-    pub width: u32,
-    pub height: u32,
+    pub size: u32,
+    // pub max_size: u32,
+    pub extent: Extent3d,
     pub texture: Texture,
     pub view: TextureView,
     pub sampler: Sampler,
 }
 
 impl Atlas {
-    pub fn new(
-        device: &Device,
-        queue: &Queue,
-        width: u32,
-        height: u32,
-        image_sources: Vec<(u32, DynamicImage)>,
-    ) -> Self {
-        // Eventually start with smaller images
-        let mut rectangles = GroupedRectsToPlace::<u32>::new();
-        for (id, image) in &image_sources {
-            let (width, height) = image.dimensions();
-            rectangles.push_rect(*id, None, RectToInsert::new(width, height, 1));
-        }
-
-        let mut bins = BTreeMap::new();
-        bins.insert(0, TargetBin::new(width, height, 1));
-
-        // Eventually don't panic with no space
-        let placements = pack_rects(
-            &rectangles,
-            &mut bins,
-            &volume_heuristic,
-            &contains_smallest_box,
-        )
-        .unwrap();
-
-        let mut rgba = vec![0; (width * height * 4) as usize];
-        let mut images = HashMap::new();
-        for (id, image) in &image_sources {
-            let (_bin_id, location) = placements.packed_locations().get(&id).unwrap();
-            images.insert(
-                *id,
-                Image {
-                    id: *id,
-                    u: location.x() as f32 / width as f32,
-                    v: location.y() as f32 / height as f32,
-                    width: location.width() as f32 / width as f32,
-                    height: location.height() as f32 / height as f32,
-                },
-            );
-
-            let bytes = image.clone().into_rgba8().to_vec();
-            for y in 0..location.height() {
-                for x in 0..location.width() {
-                    let src_idx = (x + y * location.width()) as usize * 4;
-                    let dst_idx = ((location.x() + x) + (location.y() + y) * width) as usize * 4;
-
-                    rgba[dst_idx + 0] = bytes[src_idx + 0];
-                    rgba[dst_idx + 1] = bytes[src_idx + 1];
-                    rgba[dst_idx + 2] = bytes[src_idx + 2];
-                    rgba[dst_idx + 3] = bytes[src_idx + 3];
-                }
-            }
-        }
-
-        let size = Extent3d {
-            width,
-            height,
+    pub fn new(device: &Device, size: u32) -> Self {
+        let extent = Extent3d {
+            width: size,
+            height: size,
             depth_or_array_layers: 1,
         };
 
         let texture = device.create_texture(&TextureDescriptor {
-            size,
+            size: extent,
             mip_level_count: 1,
             sample_count: 1,
             dimension: TextureDimension::D2,
@@ -95,22 +43,6 @@ impl Atlas {
             label: None,
             view_formats: &[],
         });
-
-        queue.write_texture(
-            ImageCopyTexture {
-                texture: &texture,
-                mip_level: 0,
-                origin: Origin3d::ZERO,
-                aspect: TextureAspect::All,
-            },
-            &rgba,
-            ImageDataLayout {
-                offset: 0,
-                bytes_per_row: Some(4 * width),
-                rows_per_image: Some(height),
-            },
-            size,
-        );
 
         let view = texture.create_view(&TextureViewDescriptor::default());
 
@@ -125,13 +57,81 @@ impl Atlas {
         });
 
         Self {
-            images,
-            width,
-            height,
+            sources: Vec::new(),
+            images: HashMap::new(),
+            size,
+            extent,
             texture,
             view,
             sampler,
         }
+    }
+
+    pub fn update(&mut self, queue: &Queue) {
+        // Eventually start with smaller images
+        let mut rectangles = GroupedRectsToPlace::<u32>::new();
+        for (id, image) in &self.sources {
+            let (width, height) = image.dimensions();
+            rectangles.push_rect(*id, None, RectToInsert::new(width, height, 1));
+        }
+
+        let mut bins = BTreeMap::new();
+        bins.insert(0, TargetBin::new(self.size, self.size, 1));
+
+        // Eventually don't panic with no space
+        let placements = pack_rects(
+            &rectangles,
+            &mut bins,
+            &volume_heuristic,
+            &contains_smallest_box,
+        )
+        .unwrap();
+
+        let mut rgba = vec![0; (self.size * self.size * 4) as usize];
+        let mut images = HashMap::new();
+        for (id, image) in &self.sources {
+            let (_bin_id, location) = placements.packed_locations().get(&id).unwrap();
+            images.insert(
+                *id,
+                Image {
+                    id: *id,
+                    u: location.x() as f32 / self.size as f32,
+                    v: location.y() as f32 / self.size as f32,
+                    width: location.width() as f32 / self.size as f32,
+                    height: location.height() as f32 / self.size as f32,
+                },
+            );
+
+            let bytes = image.clone().into_rgba8().to_vec();
+            for y in 0..location.height() {
+                for x in 0..location.width() {
+                    let src_idx = (x + y * location.width()) as usize * 4;
+                    let dst_idx =
+                        ((location.x() + x) + (location.y() + y) * self.size) as usize * 4;
+
+                    rgba[dst_idx + 0] = bytes[src_idx + 0];
+                    rgba[dst_idx + 1] = bytes[src_idx + 1];
+                    rgba[dst_idx + 2] = bytes[src_idx + 2];
+                    rgba[dst_idx + 3] = bytes[src_idx + 3];
+                }
+            }
+        }
+
+        queue.write_texture(
+            ImageCopyTexture {
+                texture: &self.texture,
+                mip_level: 0,
+                origin: Origin3d::ZERO,
+                aspect: TextureAspect::All,
+            },
+            &rgba,
+            ImageDataLayout {
+                offset: 0,
+                bytes_per_row: Some(self.size * 4),
+                rows_per_image: Some(self.size),
+            },
+            self.extent,
+        );
     }
 
     pub fn get(&self, id: u32) -> &Image {

@@ -3,7 +3,7 @@ use depict_macro::shape;
 use crate::{
     core::{properties::Background, renderable::Renderable},
     engine::{renderer::RenderBatch, shader::Vertex},
-    graphics::color::Color,
+    graphics::{asset::Assets, color::Color},
 };
 
 shape!(
@@ -18,6 +18,8 @@ shape!(
 );
 
 impl Renderable for Rectangle {
+    fn request(&self, _assets: &mut Assets) {}
+
     fn render(&self, batch: &mut RenderBatch) {
         match self.background {
             Background::Color(color) => {

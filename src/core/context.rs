@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc, sync::Arc};
+use std::{collections::HashMap, sync::Arc};
 
 use fontdue::FontSettings;
 use image::DynamicImage;
@@ -61,7 +61,7 @@ pub(crate) enum ContextStep {
 pub struct Context<'a> {
     pub(crate) step: ContextStep,
     pub(crate) window: Arc<Window>,
-    pub(crate) assets: &'a Assets,
+    pub(crate) assets: &'a mut Assets,
     pub size: Size,
     pub window_size: Size,
     pub mouse: &'a Tracker<Mouse>,
@@ -92,21 +92,25 @@ impl<'a> Context<'a> {
         );
     }
 
+    pub(crate) fn render(&mut self) {
+        let renderer = self.renderer.as_mut().unwrap();
+
+        let mut batch = renderer.batch(&mut self.assets, true);
+        for renderable in &self.renderables {
+            renderable.request(&mut batch.assets);
+        }
+
+        for renderable in &self.renderables {
+            renderable.render(&mut batch);
+        }
+        batch.finish();
+    }
+
     pub fn show_cursor(&mut self) {
         self.window.set_cursor_visible(true);
     }
 
     pub fn hide_cursor(&mut self) {
         self.window.set_cursor_visible(false)
-    }
-
-    pub(crate) fn render(&mut self) {
-        let renderer = self.renderer.as_mut().unwrap();
-
-        let mut batch = renderer.batch(&self.assets, true);
-        for renderable in &self.renderables {
-            renderable.render(&mut batch);
-        }
-        batch.finish();
     }
 }

@@ -18,7 +18,7 @@ pub enum TransformationEffect {
 #[derive(Debug)]
 pub struct RenderBatch<'a> {
     pub deduplicate: bool,
-    pub(crate) assets: &'a Assets,
+    pub(crate) assets: &'a mut Assets,
     renderer: &'a mut Renderer,
     vertices: Vec<Vertex>,
     absolute_transformation: Affine2,
@@ -113,7 +113,7 @@ impl Renderer {
         }
     }
 
-    pub fn batch<'a>(&'a mut self, assets: &'a Assets, deduplicate: bool) -> RenderBatch {
+    pub fn batch<'a>(&'a mut self, assets: &'a mut Assets, deduplicate: bool) -> RenderBatch {
         RenderBatch {
             deduplicate,
             assets,

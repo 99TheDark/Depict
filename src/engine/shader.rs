@@ -10,7 +10,6 @@ use wgpu::{
     VertexBufferLayout, VertexFormat, VertexState, VertexStepMode,
 };
 
-use crate::core::properties::Background;
 use crate::graphics::color::Color;
 
 struct Attributes {
