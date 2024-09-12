@@ -4,6 +4,7 @@ pub mod engine;
 pub mod graphics;
 pub mod input;
 
+use core::properties::Align;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use builtin::{rectangle::Rectangle, text::Text};
@@ -76,12 +77,14 @@ impl<'a> System<'a> for Game {
             Text::new(
                 ctx.mouse.pos.x,
                 ctx.mouse.pos.y,
-                "Whereas disregard and contempt\nfor human rights have\nresulted in barbarous acts"
+                "Whereas disregard and contempt for human rights have resulted in barbarous acts"
                     .to_string(),
                 self.roboto,
             )
-            .with_size((ctx.mouse.pos.x + ctx.mouse.pos.y) / 50.0 + 20.0)
-            .with_color(Color::WHITE),
+            .with_size(30.0)
+            .with_color(Color::WHITE)
+            .with_width(500.0)
+            .with_align(Align::Right),
         );
     }
 }

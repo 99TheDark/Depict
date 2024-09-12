@@ -14,3 +14,4 @@
 - Cap font resolution
 - Long-term caching of `TextRenderingData`
 - Implement text align & overflow
+- Redo text rendering to be better for alignment

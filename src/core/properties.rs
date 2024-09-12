@@ -16,6 +16,12 @@ pub enum Align {
     Right,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum OverflowBreak {
+    Character,
+    Word,
+}
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Border {
     pub thickness: f32,

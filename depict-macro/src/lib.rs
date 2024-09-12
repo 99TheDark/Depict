@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use shape::Shape;
-use syn::parse_macro_input;
+use syn::{parse_macro_input, GenericArgument, PathArguments, Type};
 
 mod shape;
 
@@ -37,15 +37,59 @@ pub fn shape(item: TokenStream) -> TokenStream {
             });
         }
 
+        // Based on https://stackoverflow.com/questions/55271857/how-can-i-get-the-t-from-an-optiont-when-using-syn/56264023#56264023
+        let mut inner_typ = None;
+        if let Type::Path(ref path) = field_type {
+            let source = path
+                .path
+                .segments
+                .iter()
+                .fold("".to_string(), |mut acc, cur| {
+                    acc.push_str(&cur.ident.to_string());
+                    acc.push_str("::");
+                    acc
+                });
+
+            let sources = vec![
+                "Option::".to_string(),
+                "std::option::Option::".to_string(),
+                "core::option::Option::".to_string(),
+            ];
+
+            if sources.contains(&source) {
+                // It is an option
+                if let Some(segment) = path.path.segments.last() {
+                    if let PathArguments::AngleBracketed(ref arguments) = segment.arguments {
+                        if let Some(inner) = arguments.args.first() {
+                            if let GenericArgument::Type(ref generic) = inner {
+                                inner_typ = Some(generic);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         fields.push(quote! {
             #field_name: #field_type,
         });
-        withs.push(quote! {
-            pub fn #with_name(mut self, #field_name: #field_type) -> Self {
-                self.#field_name = #field_name;
-                self
-            }
-        });
+
+        if let Some(typ) = inner_typ {
+            withs.push(quote! {
+                pub fn #with_name(mut self, #field_name: #typ) -> Self {
+                    self.#field_name = Some(#field_name);
+                    self
+                }
+            });
+        } else {
+            withs.push(quote! {
+                pub fn #with_name(mut self, #field_name: #field_type) -> Self {
+                    self.#field_name = #field_name;
+                    self
+                }
+            });
+        }
+
         cloned.push(quote! {
             #field_name: self.#field_name,
         });
