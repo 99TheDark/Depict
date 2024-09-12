@@ -74,20 +74,21 @@ impl<'a> System<'a> for Game {
 
         ctx.draw(
             Text::new(
-                100.0,
-                500.0,
+                ctx.mouse.pos.x,
+                ctx.mouse.pos.y,
                 "Whereas disregard and contempt\nfor human rights have\nresulted in barbarous acts"
                     .to_string(),
                 self.roboto,
             )
-            .with_size(60.0),
+            .with_size((ctx.mouse.pos.x + ctx.mouse.pos.y) / 50.0 + 20.0)
+            .with_color(Color::WHITE),
         );
     }
 }
 
 fn main() {
     let mut engine = Engine::new(
-        Settings::default().with_background(Color::from_rgb(50, 50, 50)),
+        Settings::default().with_background(Color::BLACK),
         Rc::new(RefCell::new(Game {
             dirt: Asset::default(),
             grass: Asset::default(),

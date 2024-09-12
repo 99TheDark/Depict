@@ -62,7 +62,7 @@ impl Renderable for Text {
         }
 
         let mut cur_x = self.x;
-        let mut cur_y = self.y;
+        let mut cur_y = self.y + self.size;
         for i in 0..data.glyphs.len() {
             let glyph = data.glyphs[i];
             let metrics = data.metrics[i];
