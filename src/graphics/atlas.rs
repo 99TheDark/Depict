@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
-use image::{DynamicImage, GenericImageView, RgbaImage};
+use image::{DynamicImage, GenericImageView};
 use rectangle_pack::{
     contains_smallest_box, pack_rects, volume_heuristic, GroupedRectsToPlace, RectToInsert,
     TargetBin,
@@ -140,9 +140,9 @@ impl Atlas {
 
         self.edited = false;
 
-        DynamicImage::ImageRgba8(RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
-            .save("res/out/font.png")
-            .unwrap();
+        /*DynamicImage::ImageRgba8(RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
+        .save("res/out/font.png")
+        .unwrap();*/
     }
 
     pub fn get(&self, id: u32) -> &Image {

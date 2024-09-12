@@ -11,10 +11,11 @@ use crate::{
     },
 };
 
-const POINT_TO_PIXELS: f32 = 4.0 / 3.0;
+pub(crate) const POINT_TO_PIXELS: f32 = 4.0 / 3.0;
 
 shape!(
     pub struct Text {
+        // TODO: Add width/overflow/max
         x: f32,
         y: f32,
         text: String,
@@ -22,6 +23,7 @@ shape!(
         thickness: FontThickness = FontThickness::Regular,
         emphasis: FontEmphasis = FontEmphasis::Regular,
         size: f32 = 16.0,
+        line_height: f32 = 1.2,
         color: Color = Color::BLACK,
     }
 );
@@ -50,71 +52,74 @@ impl Renderable for Text {
         );
     }
 
+    // TODO: Add support for vertical fonts
     fn render(&self, batch: &mut RenderBatch) {
-        let data = &batch.assets.fonts.data[&self.id];
+        let data = batch.assets.fonts.data[&self.id].clone();
         if data.glyphs.len() != data.metrics.len() {
             panic!("Incomplete corresponding metrics to glyphs in text rendering");
         }
 
+        let mut cur_x = self.x;
+        let mut cur_y = self.y;
         for i in 0..data.glyphs.len() {
-            // I really with I could just &data.(something)
-            let glyph = &batch.assets.fonts.data[&self.id].glyphs[i];
-            let metrics = &batch.assets.fonts.data[&self.id].metrics[i];
+            let glyph = data.glyphs[i];
+            let metrics = data.metrics[i];
+
+            match glyph.character {
+                '\n' => {
+                    cur_x = self.x;
+                    cur_y += self.size * POINT_TO_PIXELS * self.line_height;
+                    continue;
+                }
+                '\r' => {
+                    cur_x = self.x;
+                    continue;
+                }
+                _ => {}
+            }
 
             let image = batch.assets.fonts.atlas.get(glyph.image_id).clone();
 
-            let temp_x = self.x + i as f32 * self.size * POINT_TO_PIXELS;
-            let temp_y = 0.0;
+            let x = cur_x + metrics.xmin as f32;
+            let y = cur_y - metrics.ymin as f32;
 
-            let temp_w = self.size * POINT_TO_PIXELS;
-            let temp_h = self.size * POINT_TO_PIXELS;
+            let width = metrics.width as f32;
+            let height = metrics.height as f32;
 
             batch.triangle(
-                Vertex::new(temp_x, temp_y, image.u, image.v, Color::CLEAR, 1),
+                Vertex::new(x, y, image.u, image.v + image.height, Color::CLEAR, 1),
                 Vertex::new(
-                    temp_x + temp_w,
-                    temp_y,
+                    x + width,
+                    y,
+                    image.u + image.width,
+                    image.v + image.height,
+                    Color::CLEAR,
+                    1,
+                ),
+                Vertex::new(x, y - height, image.u, image.v, Color::CLEAR, 1),
+            );
+
+            batch.triangle(
+                Vertex::new(
+                    x + width,
+                    y,
+                    image.u + image.width,
+                    image.v + image.height,
+                    Color::CLEAR,
+                    1,
+                ),
+                Vertex::new(x, y - height, image.u, image.v, Color::CLEAR, 1),
+                Vertex::new(
+                    x + width,
+                    y - height,
                     image.u + image.width,
                     image.v,
                     Color::CLEAR,
                     1,
                 ),
-                Vertex::new(
-                    temp_x,
-                    temp_y + temp_h,
-                    image.u,
-                    image.v + image.height,
-                    Color::CLEAR,
-                    1,
-                ),
             );
 
-            batch.triangle(
-                Vertex::new(
-                    temp_x + temp_w,
-                    temp_y,
-                    image.u + image.width,
-                    image.v,
-                    Color::CLEAR,
-                    1,
-                ),
-                Vertex::new(
-                    temp_x,
-                    temp_y + temp_h,
-                    image.u,
-                    image.v + image.height,
-                    Color::CLEAR,
-                    1,
-                ),
-                Vertex::new(
-                    temp_x + temp_w,
-                    temp_y + temp_h,
-                    image.u + image.width,
-                    image.v + image.height,
-                    Color::CLEAR,
-                    1,
-                ),
-            );
+            cur_x += metrics.advance_width;
         }
     }
 }

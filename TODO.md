@@ -3,13 +3,13 @@
 - Scale with size
 - Transformations
 - Make mouse coords scale
-- Text generation [WIP]
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)
 - Figure out what to do when out of space in atlas
 - Add circle, ellipse, triangle, etc to renderer
 - Outlines/borders?
 - Complain about unloaded assets being used
-- Caching
 - Move bind groups to atlas
 - Switch atlas to use `IDFactory`
+- Atlas image caching
+- Cap font resolution

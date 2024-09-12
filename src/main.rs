@@ -72,7 +72,16 @@ impl<'a> System<'a> for Game {
                 .with_background(Background::Image(self.brick)),
         ]);
 
-        ctx.draw(Text::new(500.0, 500.0, "Hello".to_string(), self.roboto).with_size(40.0));
+        ctx.draw(
+            Text::new(
+                500.0,
+                500.0,
+                "Whereas disregard and contempt for human\nrights have resulted".to_string(),
+                self.roboto,
+            )
+            .with_size(80.0)
+            .with_color(Color::CYAN),
+        );
     }
 }
 

@@ -122,8 +122,8 @@ impl<'a> State<'a> {
 
         system.borrow_mut().init(&mut ctx);
 
-        // Temporary cap
-        let max_size = Limits::default().max_texture_dimension_2d * 0 + 128;
+        // TODO: Fix, temporary cap (needs to expand and start at some minimum)
+        let max_size = Limits::default().max_texture_dimension_2d * 0 + 512;
 
         let mut image_atlas = Atlas::new(&device, max_size);
         image_atlas.sources = ctx.img_sources;

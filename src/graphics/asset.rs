@@ -1,9 +1,10 @@
 use std::{collections::HashMap, fmt::Debug, marker::PhantomData};
 
+use fontdue::Metrics;
 use image::{DynamicImage, RgbaImage};
 
 use super::{atlas::Atlas, glyph::TextRenderingData};
-use crate::graphics::font;
+use crate::{builtin::text::POINT_TO_PIXELS, graphics::font};
 
 #[derive(Debug)]
 pub struct FontAsset {
@@ -15,11 +16,31 @@ pub struct FontAsset {
 impl FontAsset {
     pub(crate) fn update(&mut self) {
         for (_, TextRenderingData { glyphs, metrics }) in &mut self.data {
-            for glyph in glyphs {
+            'outer: for idx in 0..glyphs.len() {
+                for i in 0..idx {
+                    //println!("{:#?}",glyphs[idx]);
+                    if glyphs[idx] == glyphs[i] {
+                        glyphs[idx] = glyphs[i].clone();
+                        metrics.push(metrics[i]);
+                        continue 'outer;
+                    }
+                }
+
+                let glyph = &mut glyphs[idx];
+
+                // Maybe eventually add form feed & vertical tab?
+                if glyph.character == '\n' || glyph.character == '\r' {
+                    metrics.push(Metrics::default());
+                    continue;
+                }
+
                 let font = &self.fonts[&glyph.font_id];
                 let font_style = &font.styles[&(glyph.thickness, glyph.emphasis)];
 
-                let (font_metrics, bitmap) = font_style.rasterize(glyph.character, glyph.size);
+                // Convert pt to px
+                let size = glyph.size * POINT_TO_PIXELS;
+
+                let (font_metrics, bitmap) = font_style.rasterize(glyph.character, size);
                 metrics.push(font_metrics);
 
                 let width = font_metrics.width;
@@ -28,6 +49,11 @@ impl FontAsset {
                 let mut rgba = vec![0; width * height * 4];
                 for i in 0..width * height {
                     let idx = i * 4;
+
+                    // Why though?
+                    if bitmap[i] == 0 {
+                        continue;
+                    }
 
                     rgba[idx] = (glyph.color.red * 255.0) as u8;
                     rgba[idx + 1] = (glyph.color.green * 255.0) as u8;

@@ -5,7 +5,7 @@ use super::{
     font::{FontEmphasis, FontThickness},
 };
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone)]
 pub(crate) struct Glyph {
     pub character: char,
     pub font_id: u32,
@@ -16,7 +16,18 @@ pub(crate) struct Glyph {
     pub emphasis: FontEmphasis,
 }
 
-#[derive(Debug)]
+impl PartialEq for Glyph {
+    fn eq(&self, other: &Self) -> bool {
+        self.character == other.character
+            && self.font_id == other.font_id
+            && self.size == other.size
+            && self.color == other.color
+            && self.thickness == other.thickness
+            && self.emphasis == other.emphasis
+    }
+}
+
+#[derive(Debug, Clone)]
 pub(crate) struct TextRenderingData {
     pub glyphs: Vec<Glyph>,
     pub metrics: Vec<Metrics>,
