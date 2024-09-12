@@ -13,10 +13,10 @@ pub enum FontThickness {
     Black,
 }
 
+// Could I just make this a bool is_italic?
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum FontEmphasis {
     Regular,
-    Bold,
     Italic,
 }
 

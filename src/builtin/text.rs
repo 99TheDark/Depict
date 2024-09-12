@@ -95,6 +95,11 @@ impl Renderable for Text {
             let glyph = data.glyphs[i];
             let metrics = data.metrics[i];
 
+            if cur_x - self.x + metrics.advance_width >= *cur_width {
+                cur_x = self.x;
+                cur_y += self.size * POINT_TO_PIXELS * self.line_height;
+            }
+
             match glyph.character {
                 '\n' => {
                     cur_x = self.x;
@@ -165,11 +170,6 @@ impl Renderable for Text {
             );
 
             cur_x += metrics.advance_width;
-
-            if cur_x - self.x >= *cur_width {
-                cur_x = self.x;
-                cur_y += self.size * POINT_TO_PIXELS * self.line_height;
-            }
         }
     }
 }

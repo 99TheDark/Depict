@@ -140,7 +140,7 @@ impl Atlas {
 
         self.edited = false;
 
-        /*DynamicImage::ImageRgba8(RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
+        /*DynamicImage::ImageRgba8(image::RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
         .save("res/out/font.png")
         .unwrap();*/
     }

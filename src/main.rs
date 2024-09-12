@@ -37,11 +37,63 @@ impl<'a> System<'a> for Game {
         self.grass = ctx.image(include_bytes!("../res/grass.png"));
         self.brick = ctx.image(include_bytes!("../res/brick.png"));
 
-        self.roboto = ctx.font(HashMap::from([(
-            (FontThickness::Regular, FontEmphasis::Regular),
-            // Literally why do I need to cast this
-            include_bytes!("../res/Roboto/Roboto-Regular.ttf") as &[u8],
-        )]));
+        // Loads the entire Roboto font
+        self.roboto = ctx.font(HashMap::from([
+            (
+                (FontThickness::Thin, FontEmphasis::Regular),
+                // Literally why do I need to cast this
+                include_bytes!("../res/Roboto/Roboto-Thin.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Light, FontEmphasis::Regular),
+                // Literally why do I need to cast this
+                include_bytes!("../res/Roboto/Roboto-Light.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Regular, FontEmphasis::Regular),
+                // Literally why do I need to cast this
+                include_bytes!("../res/Roboto/Roboto-Regular.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Medium, FontEmphasis::Regular),
+                include_bytes!("../res/Roboto/Roboto-Medium.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Bold, FontEmphasis::Regular),
+                include_bytes!("../res/Roboto/Roboto-Bold.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Black, FontEmphasis::Regular),
+                include_bytes!("../res/Roboto/Roboto-Black.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Thin, FontEmphasis::Italic),
+                // Literally why do I need to cast this
+                include_bytes!("../res/Roboto/Roboto-ThinItalic.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Light, FontEmphasis::Italic),
+                // Literally why do I need to cast this
+                include_bytes!("../res/Roboto/Roboto-LightItalic.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Regular, FontEmphasis::Italic),
+                // Literally why do I need to cast this
+                include_bytes!("../res/Roboto/Roboto-Italic.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Medium, FontEmphasis::Italic),
+                include_bytes!("../res/Roboto/Roboto-MediumItalic.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Bold, FontEmphasis::Italic),
+                include_bytes!("../res/Roboto/Roboto-BoldItalic.ttf") as &[u8],
+            ),
+            (
+                (FontThickness::Black, FontEmphasis::Italic),
+                include_bytes!("../res/Roboto/Roboto-BlackItalic.ttf") as &[u8],
+            ),
+        ]));
     }
 
     fn update(&mut self, ctx: &mut Context) {}
@@ -81,10 +133,12 @@ impl<'a> System<'a> for Game {
                     .to_string(),
                 self.roboto,
             )
-            .with_size(30.0)
+            .with_size(50.0)
             .with_color(Color::WHITE)
-            .with_width(500.0)
-            .with_align(Align::Right),
+            .with_width(ctx.size.width as f32 - ctx.mouse.pos.x)
+            .with_align(Align::Right)
+            .with_emphasis(FontEmphasis::Italic)
+            .with_thickness(FontThickness::Bold),
         );
     }
 }
