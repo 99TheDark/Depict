@@ -21,6 +21,7 @@ use crate::{
     graphics::{
         asset::{Assets, FontAsset},
         atlas::Atlas,
+        font,
     },
     input::{keyboard::Keyboard, mouse::Mouse, tracker::Tracker},
 };
@@ -46,6 +47,7 @@ pub(crate) struct State<'a> {
     index_buffer: Buffer,
     pipeline: RenderPipeline,
     texture_bind_group: BindGroup,
+    font_bind_group: BindGroup,
     uniforms: Uniforms,
     pub(crate) properties: Properties,
     pub(crate) mouse: Tracker<Mouse>,
@@ -120,12 +122,12 @@ impl<'a> State<'a> {
 
         system.borrow_mut().init(&mut ctx);
 
-        let max_size = Limits::default().max_texture_dimension_2d;
+        // Temporary cap
+        let max_size = Limits::default().max_texture_dimension_2d * 0 + 128;
 
         let mut image_atlas = Atlas::new(&device, max_size);
         image_atlas.sources = ctx.img_sources;
-
-        let font_atlas = Atlas::new(&device, max_size);
+        image_atlas.edited = true;
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
@@ -165,10 +167,62 @@ impl<'a> State<'a> {
             ],
         });
 
+        let font_atlas = Atlas::new(&device, max_size);
+
+        let font_bind_group_layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+            label: Some("Font Bind Group Layout"),
+            entries: &[
+                BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: ShaderStages::FRAGMENT,
+                    ty: BindingType::Texture {
+                        multisampled: false,
+                        view_dimension: TextureViewDimension::D2,
+                        sample_type: TextureSampleType::Float { filterable: true },
+                    },
+                    count: None,
+                },
+                BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: ShaderStages::FRAGMENT,
+                    ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+        });
+
+        let font_bind_group = device.create_bind_group(&BindGroupDescriptor {
+            label: Some("Font Bind Group"),
+            layout: &font_bind_group_layout,
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureView(&font_atlas.view),
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::Sampler(&font_atlas.sampler),
+                },
+            ],
+        });
+
+        let mut fonts = HashMap::new();
+        for source in ctx.font_sources {
+            fonts.insert(
+                source.0,
+                font::Font {
+                    id: source.0,
+                    styles: source.1,
+                },
+            );
+        }
+
         let assets = Assets {
             images: image_atlas,
             fonts: FontAsset {
-                fonts: HashMap::new(),
+                fonts,
+                glyphs: Vec::new(),
+                metrics: Vec::new(),
                 atlas: font_atlas,
             },
         };
@@ -206,7 +260,11 @@ impl<'a> State<'a> {
         let shader = Shader::new("shaders/shader.wgsl", config.format);
         let pipeline = shader.build(
             &device,
-            &[&texture_bind_group_layout, &uniform_bind_group_layout],
+            &[
+                &uniform_bind_group_layout,
+                &texture_bind_group_layout,
+                &font_bind_group_layout,
+            ],
         );
 
         let properties = Properties {
@@ -234,6 +292,7 @@ impl<'a> State<'a> {
             index_buffer,
             pipeline,
             texture_bind_group,
+            font_bind_group,
             uniforms,
             properties,
             mouse,
@@ -263,7 +322,7 @@ impl<'a> State<'a> {
         };
 
         self.system.borrow_mut().render(&mut ctx);
-        ctx.render();
+        ctx.render(&self.queue);
 
         renderer.build(&self.device)
     }
@@ -317,8 +376,9 @@ impl<'a> State<'a> {
 
             render_pass.set_pipeline(&self.pipeline);
 
-            render_pass.set_bind_group(0, &self.texture_bind_group, &[]);
-            render_pass.set_bind_group(1, &self.uniforms.bind_group, &[]);
+            render_pass.set_bind_group(0, &self.uniforms.bind_group, &[]);
+            render_pass.set_bind_group(1, &self.texture_bind_group, &[]);
+            render_pass.set_bind_group(2, &self.font_bind_group, &[]);
 
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint16);

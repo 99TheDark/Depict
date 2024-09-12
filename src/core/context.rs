@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use fontdue::FontSettings;
 use image::DynamicImage;
+use wgpu::Queue;
 use winit::window::Window;
 
 use crate::{
@@ -92,13 +93,25 @@ impl<'a> Context<'a> {
         );
     }
 
-    pub(crate) fn render(&mut self) {
+    pub(crate) fn render(&mut self, queue: &Queue) {
         let renderer = self.renderer.as_mut().unwrap();
 
         let mut batch = renderer.batch(&mut self.assets, true);
+
+        // Not the way to go
+        batch.assets.fonts.atlas.sources.clear();
+        batch.assets.fonts.atlas.images.clear();
+        batch.assets.fonts.glyphs.clear();
+        batch.assets.fonts.metrics.clear();
+
         for renderable in &self.renderables {
             renderable.request(&mut batch.assets);
         }
+
+        batch.assets.fonts.update();
+
+        batch.assets.images.update(&queue);
+        batch.assets.fonts.atlas.update(&queue);
 
         for renderable in &self.renderables {
             renderable.render(&mut batch);

@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
-use image::{DynamicImage, GenericImageView};
+use image::{DynamicImage, GenericImageView, RgbaImage};
 use rectangle_pack::{
     contains_smallest_box, pack_rects, volume_heuristic, GroupedRectsToPlace, RectToInsert,
     TargetBin,
@@ -14,19 +14,20 @@ use wgpu::{
 use super::image::Image;
 
 #[derive(Debug)]
-pub(crate) struct Atlas {
-    pub sources: Vec<(u32, DynamicImage)>,
-    pub images: HashMap<u32, Image>,
+pub struct Atlas {
+    pub(crate) sources: Vec<(u32, DynamicImage)>,
+    pub(crate) images: HashMap<u32, Image>,
     pub size: u32,
     // pub max_size: u32,
     pub extent: Extent3d,
-    pub texture: Texture,
-    pub view: TextureView,
-    pub sampler: Sampler,
+    pub(crate) texture: Texture,
+    pub(crate) view: TextureView,
+    pub(crate) sampler: Sampler,
+    pub(crate) edited: bool,
 }
 
 impl Atlas {
-    pub fn new(device: &Device, size: u32) -> Self {
+    pub(crate) fn new(device: &Device, size: u32) -> Self {
         let extent = Extent3d {
             width: size,
             height: size,
@@ -64,10 +65,15 @@ impl Atlas {
             texture,
             view,
             sampler,
+            edited: false,
         }
     }
 
-    pub fn update(&mut self, queue: &Queue) {
+    pub(crate) fn update(&mut self, queue: &Queue) {
+        if !self.edited {
+            return;
+        }
+
         // Eventually start with smaller images
         let mut rectangles = GroupedRectsToPlace::<u32>::new();
         for (id, image) in &self.sources {
@@ -88,10 +94,9 @@ impl Atlas {
         .unwrap();
 
         let mut rgba = vec![0; (self.size * self.size * 4) as usize];
-        let mut images = HashMap::new();
         for (id, image) in &self.sources {
             let (_bin_id, location) = placements.packed_locations().get(&id).unwrap();
-            images.insert(
+            self.images.insert(
                 *id,
                 Image {
                     id: *id,
@@ -132,9 +137,23 @@ impl Atlas {
             },
             self.extent,
         );
+
+        self.edited = false;
+
+        DynamicImage::ImageRgba8(RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
+            .save("res/out/font.png")
+            .unwrap();
     }
 
     pub fn get(&self, id: u32) -> &Image {
         &self.images[&id]
+    }
+
+    pub fn add(&mut self, source: DynamicImage) {
+        // Breaks if images are removed
+        let id = self.sources.len() as u32;
+        self.sources.push((id, source));
+
+        self.edited = true;
     }
 }

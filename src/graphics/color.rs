@@ -1,3 +1,5 @@
+use std::hash::{Hash, Hasher};
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Color {
     pub red: f32,
@@ -80,6 +82,10 @@ impl Color {
         }
     }
 
+    pub fn from_rgb(red: u8, green: u8, blue: u8) -> Self {
+        Self::from_rgba(red, green, blue, 255)
+    }
+
     pub fn from_hex(hex: u32) -> Self {
         Color {
             red: ((hex >> 24) & 255) as f32 / 255.0,
@@ -89,7 +95,20 @@ impl Color {
         }
     }
 
+    pub fn to_hex(&self) -> u32 {
+        ((self.red * 255.0) as u32) << 24
+            | ((self.green * 255.0) as u32) << 16
+            | ((self.blue * 255.0) as u32) << 8
+            | ((self.alpha * 255.0) as u32)
+    }
+
     pub fn to_array(&self) -> [f32; 4] {
         [self.red, self.green, self.blue, self.alpha]
+    }
+}
+
+impl Hash for Color {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.to_hex().hash(state);
     }
 }

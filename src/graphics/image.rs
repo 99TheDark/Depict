@@ -1,10 +1,10 @@
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub(crate) struct Image {
+pub struct Image {
     pub(crate) id: u32,
-    pub(crate) u: f32,
-    pub(crate) v: f32,
-    pub(crate) width: f32,
-    pub(crate) height: f32,
+    pub u: f32,
+    pub v: f32,
+    pub width: f32,
+    pub height: f32,
 }
 
 impl Image {

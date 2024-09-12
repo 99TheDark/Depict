@@ -42,7 +42,7 @@ impl Renderable for Rectangle {
                 );
             }
             Background::Image(asset) => {
-                let image = batch.assets.images.get(asset.id);
+                let image = batch.assets.images.get(asset.id).clone();
 
                 batch.triangle(
                     Vertex::new(self.x, self.y, image.u, image.v, Color::CLEAR, 0),

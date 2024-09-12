@@ -4,12 +4,13 @@ pub mod engine;
 pub mod graphics;
 pub mod input;
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use builtin::{rectangle::Rectangle, text::Text};
 use graphics::{
     asset::{Asset, Font, Image},
     color::Color,
+    font::{FontEmphasis, FontThickness},
 };
 
 use crate::core::{
@@ -33,6 +34,12 @@ impl<'a> System<'a> for Game {
         self.dirt = ctx.image(include_bytes!("../res/dirt.png"));
         self.grass = ctx.image(include_bytes!("../res/grass.png"));
         self.brick = ctx.image(include_bytes!("../res/brick.png"));
+
+        self.roboto = ctx.font(HashMap::from([(
+            (FontThickness::Regular, FontEmphasis::Regular),
+            // Literally why do I need to cast this
+            include_bytes!("../res/Roboto/Roboto-Regular.ttf") as &[u8],
+        )]));
     }
 
     fn update(&mut self, ctx: &mut Context) {}
@@ -64,13 +71,13 @@ impl<'a> System<'a> for Game {
                 .with_background(Background::Image(self.brick)),
         ]);
 
-        ctx.draw(Text::new(0.0, 50.0, "Hello".to_string(), self.roboto));
+        ctx.draw(Text::new(500.0, 500.0, "Hello".to_string(), self.roboto).with_size(40.0));
     }
 }
 
 fn main() {
     let mut engine = Engine::new(
-        Settings::default(),
+        Settings::default().with_background(Color::from_rgb(50, 50, 50)),
         Rc::new(RefCell::new(Game {
             dirt: Asset::default(),
             grass: Asset::default(),

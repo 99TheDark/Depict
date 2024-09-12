@@ -3,8 +3,7 @@
 - Scale with size
 - Transformations
 - Make mouse coords scale
-- Dynamically updating atlases
-- Text generation
+- Text generation [WIP]
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)
 - Figure out what to do when out of space in atlas
@@ -12,3 +11,4 @@
 - Outlines/borders?
 - Complain about unloaded assets being used
 - Caching
+- Move bind groups to atlas

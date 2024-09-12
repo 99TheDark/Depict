@@ -19,7 +19,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            background: Color::CLEAR,
+            background: Color::WHITE,
             size: None,
             min_size: None,
             max_size: None,

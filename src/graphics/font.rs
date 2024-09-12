@@ -21,7 +21,7 @@ pub enum FontEmphasis {
 }
 
 #[derive(Debug)]
-pub(crate) struct Font {
+pub struct Font {
     pub(crate) id: u32,
-    pub(crate) styles: HashMap<(FontThickness, FontEmphasis), fontdue::Font>,
+    pub styles: HashMap<(FontThickness, FontEmphasis), fontdue::Font>,
 }
