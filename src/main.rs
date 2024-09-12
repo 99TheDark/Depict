@@ -74,13 +74,13 @@ impl<'a> System<'a> for Game {
 
         ctx.draw(
             Text::new(
+                100.0,
                 500.0,
-                500.0,
-                "Whereas disregard and contempt for human\nrights have resulted".to_string(),
+                "Whereas disregard and contempt\nfor human rights have\nresulted in barbarous acts"
+                    .to_string(),
                 self.roboto,
             )
-            .with_size(80.0)
-            .with_color(Color::CYAN),
+            .with_size(60.0),
         );
     }
 }

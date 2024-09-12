@@ -1,7 +1,7 @@
 use depict_macro::shape;
 
 use crate::{
-    core::renderable::Renderable,
+    core::{properties::Align, renderable::Renderable},
     engine::{renderer::RenderBatch, shader::Vertex},
     graphics::{
         asset::{Asset, Assets, Font},
@@ -15,7 +15,6 @@ pub(crate) const POINT_TO_PIXELS: f32 = 4.0 / 3.0;
 
 shape!(
     pub struct Text {
-        // TODO: Add width/overflow/max
         x: f32,
         y: f32,
         text: String,
@@ -24,6 +23,9 @@ shape!(
         emphasis: FontEmphasis = FontEmphasis::Regular,
         size: f32 = 16.0,
         line_height: f32 = 1.2,
+        width: Option<f32> = None,
+        height: Option<f32> = None,
+        align: Align = Align::Left,
         color: Color = Color::BLACK,
     }
 );

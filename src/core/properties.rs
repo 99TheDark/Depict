@@ -9,6 +9,13 @@ pub enum Background {
     Image(Asset<Image>),
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum Align {
+    Left,
+    Center,
+    Right,
+}
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Border {
     pub thickness: f32,

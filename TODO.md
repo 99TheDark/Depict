@@ -12,4 +12,4 @@
 - Move bind groups to atlas
 - Switch atlas to use `IDFactory`
 - Cap font resolution
-- Caching characters across `Text`s
+- Long-term caching of `TextRenderingData`

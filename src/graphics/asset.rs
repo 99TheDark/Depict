@@ -18,7 +18,6 @@ impl FontAsset {
         for (_, TextRenderingData { glyphs, metrics }) in &mut self.data {
             'outer: for idx in 0..glyphs.len() {
                 for i in 0..idx {
-                    //println!("{:#?}",glyphs[idx]);
                     if glyphs[idx] == glyphs[i] {
                         glyphs[idx] = glyphs[i].clone();
                         metrics.push(metrics[i]);
