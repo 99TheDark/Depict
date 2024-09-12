@@ -98,11 +98,10 @@ impl<'a> Context<'a> {
 
         let mut batch = renderer.batch(&mut self.assets, true);
 
-        // Not the way to go
+        // Not the way to go at all (need to cache and delete the ones not used again or something)
         batch.assets.fonts.atlas.sources.clear();
         batch.assets.fonts.atlas.images.clear();
-        batch.assets.fonts.glyphs.clear();
-        batch.assets.fonts.metrics.clear();
+        batch.assets.fonts.data.clear();
 
         for renderable in &self.renderables {
             renderable.request(&mut batch.assets);

@@ -20,6 +20,7 @@ pub enum FontEmphasis {
     Italic,
 }
 
+// Is this necessary??
 #[derive(Debug)]
 pub struct Font {
     pub(crate) id: u32,

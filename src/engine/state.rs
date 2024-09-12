@@ -221,8 +221,7 @@ impl<'a> State<'a> {
             images: image_atlas,
             fonts: FontAsset {
                 fonts,
-                glyphs: Vec::new(),
-                metrics: Vec::new(),
+                data: HashMap::new(),
                 atlas: font_atlas,
             },
         };

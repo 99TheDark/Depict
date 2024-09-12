@@ -149,11 +149,13 @@ impl Atlas {
         &self.images[&id]
     }
 
-    pub fn add(&mut self, source: DynamicImage) {
+    pub fn add(&mut self, source: DynamicImage) -> u32 {
         // Breaks if images are removed
         let id = self.sources.len() as u32;
         self.sources.push((id, source));
 
         self.edited = true;
+
+        id
     }
 }

@@ -7,6 +7,7 @@ pub mod input;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use builtin::{rectangle::Rectangle, text::Text};
+use engine::id::ID_FACTORY;
 use graphics::{
     asset::{Asset, Font, Image},
     color::Color,

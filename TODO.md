@@ -12,3 +12,4 @@
 - Complain about unloaded assets being used
 - Caching
 - Move bind groups to atlas
+- Switch atlas to use `IDFactory`

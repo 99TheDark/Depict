@@ -54,12 +54,14 @@ pub fn shape(item: TokenStream) -> TokenStream {
     let expanded = quote! {
         #[derive(Debug, Clone)]
         #visibility struct #name {
+            pub(crate) id: u32,
             #( #fields )*
         }
 
         impl #name {
             pub fn new(#( #params )*) -> Self {
                 Self {
+                    id: unsafe { crate::ID_FACTORY.next() },
                     #( #defaults )*
                 }
             }
