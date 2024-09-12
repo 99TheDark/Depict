@@ -11,5 +11,5 @@
 - Complain about unloaded assets being used
 - Move bind groups to atlas
 - Switch atlas to use `IDFactory`
-- Atlas image caching
 - Cap font resolution
+- Caching characters across `Text`s
