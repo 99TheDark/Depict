@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, iter, rc::Rc, sync::Arc};
+use std::{cell::RefCell, collections::HashMap, iter, rc::Rc, sync::Arc, time::SystemTime};
 
 use bytemuck::cast_slice;
 use wgpu::{
@@ -31,6 +31,7 @@ use super::{
     properties::{Properties, Size},
     renderer::Renderer,
     shader::Shader,
+    time::Time,
     uniforms::{ScaleData, Uniform, Uniforms},
 };
 
@@ -54,6 +55,7 @@ pub(crate) struct State<'a> {
     pub(crate) mouse: Tracker<Mouse>,
     pub(crate) keyboard: Tracker<Keyboard>,
     pub(crate) clear_color: Color,
+    pub(crate) time: Time,
     system: Rc<RefCell<dyn System<'a>>>,
 }
 
@@ -303,12 +305,16 @@ impl<'a> State<'a> {
                 b: settings.background.blue as f64,
                 a: 1.0 - settings.background.alpha as f64,
             },
+            time: Time {
+                start: SystemTime::now(),
+            },
             system,
         }
     }
 
     fn build(&mut self) -> (u32, Buffer, Buffer) {
         let mut renderer = Renderer::new();
+        // TODO: Reorder
         let mut ctx = Context {
             step: ContextStep::Render,
             size: Dimension::new(self.size.width as f32, self.size.height as f32),
@@ -316,6 +322,7 @@ impl<'a> State<'a> {
             window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
+            time: &self.time,
             renderer: Some(&mut renderer),
             renderables: Vec::new(),
             window: self.window.clone(),
@@ -335,6 +342,7 @@ impl<'a> State<'a> {
             window_size: self.properties.size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
+            time: &self.time,
             renderer: None,
             renderables: Vec::new(),
             window: self.window.clone(),

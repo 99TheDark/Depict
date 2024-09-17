@@ -29,6 +29,8 @@ struct Game {
     brick: Asset<Image>,
 
     roboto: Asset<Font>,
+
+    text_pos: f32,
 }
 
 impl<'a> System<'a> for Game {
@@ -96,7 +98,9 @@ impl<'a> System<'a> for Game {
         ]));
     }
 
-    fn update(&mut self, ctx: &mut Context) {}
+    fn update(&mut self, ctx: &mut Context) {
+        self.text_pos = ctx.size.width / 2.0 + f32::sin(ctx.time.seconds() as f32) * 100.0;
+    }
 
     fn render(&mut self, ctx: &mut Context) {
         ctx.draw_all(vec![
@@ -127,7 +131,7 @@ impl<'a> System<'a> for Game {
 
         ctx.draw(
             Text::new(
-                ctx.size.width / 2.0,
+                self.text_pos,
                 ctx.mouse.pos.y,
                 "Whereas disregard and contempt\n for human rights have\nresulted in barbarous acts.\rok?"
                     .to_string(),
@@ -135,7 +139,6 @@ impl<'a> System<'a> for Game {
             )
             .with_size(50.0)
             .with_color(Color::WHITE)
-            // .with_width(ctx.size.width)
             .with_align(Align::Center)
             .with_emphasis(FontEmphasis::Italic)
             .with_thickness(FontThickness::Bold),
@@ -152,6 +155,8 @@ fn main() {
             brick: Asset::default(),
 
             roboto: Asset::default(),
+
+            text_pos: 0.0,
         })),
     );
     engine.run();

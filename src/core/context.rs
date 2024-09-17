@@ -6,7 +6,7 @@ use wgpu::Queue;
 use winit::window::Window;
 
 use crate::{
-    engine::{dimension::Dimension, properties::Size, renderer::Renderer},
+    engine::{dimension::Dimension, properties::Size, renderer::Renderer, time::Time},
     graphics::{
         asset::{Asset, Assets, Font, Image},
         font::{FontEmphasis, FontThickness},
@@ -67,6 +67,7 @@ pub struct Context<'a> {
     pub window_size: Size,
     pub mouse: &'a Tracker<Mouse>,
     pub keyboard: &'a Tracker<Keyboard>,
+    pub time: &'a Time,
     pub(crate) renderer: Option<&'a mut Renderer>,
     pub(crate) renderables: Vec<Box<dyn Renderable + 'static>>,
 }
