@@ -129,7 +129,7 @@ impl<'a> System<'a> for Game {
             Text::new(
                 ctx.mouse.pos.x,
                 ctx.mouse.pos.y,
-                "Whereas disregard and contempt for human rights have resulted in barbarous acts"
+                "Whereas disregard and contempt for human rights have resulted in barbarous acts."
                     .to_string(),
                 self.roboto,
             )

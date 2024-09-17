@@ -43,7 +43,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             return textureSample(font_atlas, font_sampler, in.uv);
         }
         default: {
-            return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+            return in.color;
         }
     }
 }

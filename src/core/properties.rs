@@ -18,8 +18,8 @@ pub enum Align {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum OverflowBreak {
-    Character,
     Word,
+    Character,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
