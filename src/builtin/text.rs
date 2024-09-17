@@ -138,7 +138,7 @@ impl Renderable for Text {
 
                 let x_offset = match self.align {
                     Align::Left => 0.0,
-                    Align::Center => total_width - line.width * 0.5,
+                    Align::Center => (total_width - line.width) * 0.5,
                     Align::Right => total_width - line.width,
                 };
 

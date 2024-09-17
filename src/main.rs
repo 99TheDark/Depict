@@ -136,7 +136,7 @@ impl<'a> System<'a> for Game {
             .with_size(50.0)
             .with_color(Color::WHITE)
             .with_width(ctx.size.width as f32 - ctx.mouse.pos.x)
-            .with_align(Align::Right)
+            .with_align(Align::Center)
             .with_emphasis(FontEmphasis::Italic)
             .with_thickness(FontThickness::Bold),
         );
