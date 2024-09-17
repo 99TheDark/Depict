@@ -130,20 +130,10 @@ impl<'a> System<'a> for Game {
         ]);
 
         ctx.draw(
-            Rectangle::new(
-                self.text_pos - ctx.size.width * 0.25,
-                ctx.mouse.pos.y - 50.0,
-                ctx.size.width * 0.5,
-                450.0,
-            )
-            .with_background(Background::Color(Color::GREEN)),
-        );
-
-        ctx.draw(
             Text::new(
                 self.text_pos,
                 ctx.mouse.pos.y,
-                "Whereas disregard and contempt\n for human rights have\nresulted in barbarous acts.            Supercalifragilisticexpialadocious"
+                "Whereas disregard and contempt for human rights have resulted in barbarous acts.            Supercalifragilisticexpialadocious"
                     .to_string(),
                 self.roboto,
             )

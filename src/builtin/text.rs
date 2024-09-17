@@ -122,7 +122,8 @@ impl Renderable for Text {
             used_width
         };
 
-        let vertical_shift = self.size * POINT_TO_PIXELS * self.line_height;
+        let size = self.size * POINT_TO_PIXELS;
+        let vertical_shift = size * self.line_height;
 
         let mut calc_x = 0.0;
         let mut calc_y = 0.0;
@@ -149,7 +150,7 @@ impl Renderable for Text {
                 }
 
                 let x = self.x + calc_x + metrics.xmin as f32;
-                let y = self.y + calc_y - metrics.ymin as f32;
+                let y = self.y + size + calc_y - metrics.ymin as f32;
 
                 let width = metrics.width as f32;
                 let height = metrics.height as f32;

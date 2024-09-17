@@ -15,4 +15,3 @@
 - Long-term caching of `TextRenderingData`
 - Setting to disable resizing
 - Setting to disable aspect ratio keeping
-- Make text start from top-left (subtract size)
