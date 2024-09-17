@@ -13,5 +13,3 @@
 - Switch atlas to use `IDFactory`
 - Cap font resolution
 - Long-term caching of `TextRenderingData`
-- Redo text rendering to be better for alignment
-    - Implement text align & overflow
