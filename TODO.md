@@ -13,4 +13,3 @@
 - Switch atlas to use `IDFactory`
 - Cap font resolution
 - Long-term caching of `TextRenderingData`
-- Make center alignment work better
