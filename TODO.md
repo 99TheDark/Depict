@@ -1,8 +1,8 @@
 # TODO
 - Clipping
-- Scale with size
+- World/view transformations
+    - Transform by size correction
 - Transformations
-- Make mouse coords scale
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)
 - Figure out what to do when out of space in atlas
@@ -13,3 +13,6 @@
 - Switch atlas to use `IDFactory`
 - Cap font resolution
 - Long-term caching of `TextRenderingData`
+- Setting to disable resizing
+- Setting to disable aspect ratio keeping
+- Make text start from top-left (subtract size)

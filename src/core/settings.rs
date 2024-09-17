@@ -14,6 +14,8 @@ pub struct Settings {
     pub visible: bool,
     pub transparent: bool,
     pub active: bool,
+    // pub keep_aspect_ratio: bool,
+    // pub scale_up: bool,
 }
 
 impl Default for Settings {
@@ -30,6 +32,8 @@ impl Default for Settings {
             visible: true,
             transparent: false,
             active: true,
+            // keep_aspect_ratio: true,
+            // scale_up: true,
         }
     }
 }
@@ -89,6 +93,18 @@ impl Settings {
         self.active = active;
         self
     }
+
+    /*
+    pub fn with_keep_aspect_ratio(mut self, keep_aspect_ratio: bool) -> Self {
+        self.keep_aspect_ratio = keep_aspect_ratio;
+        self
+    }
+
+    pub fn with_scale_up(mut self, scale_up: bool) -> Self {
+        self.scale_up = scale_up;
+        self
+    }
+    */
 }
 
 impl Settings {

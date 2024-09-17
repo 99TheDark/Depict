@@ -3,7 +3,7 @@ pub(crate) struct IDFactory {
 }
 
 impl IDFactory {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { counter: 0 }
     }
 
@@ -18,4 +18,4 @@ impl IDFactory {
     }
 }
 
-pub(crate) static mut ID_FACTORY: IDFactory = IDFactory { counter: 0 };
+pub(crate) static mut ID_FACTORY: IDFactory = IDFactory::new();

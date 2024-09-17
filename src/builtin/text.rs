@@ -31,6 +31,7 @@ shape!(
         align: Align = Align::Left,
         color: Color = Color::BLACK,
         overflow_break: OverflowBreak = OverflowBreak::Word,
+        trim_whitespace: bool = true,
     }
 );
 
@@ -139,6 +140,11 @@ impl Renderable for Text {
                         calc_y -= vertical_shift;
                         continue 'outer;
                     }
+                    ' ' | '\t' => {
+                        if calc_x == 0.0 {
+                            //continue;
+                        }
+                    }
                     _ => {}
                 }
 
@@ -170,15 +176,22 @@ impl Text {
     fn lines(&self, data: &TextRenderingData, max_width: f32) -> (Vec<Chunk>, f32) {
         let mut glyph_groups = Vec::new();
         let mut cur_group = Vec::new();
+        let mut was_ws = false;
         for (i, c) in self.text.chars().enumerate() {
+            if was_ws && c == ' ' || c == '\t' {
+                continue;
+            }
+
             if c == ' ' || c == '\n' || c == '\r' || c == '\t' {
                 glyph_groups.push(cur_group.clone());
                 glyph_groups.push(vec![i]);
                 cur_group.clear();
+                was_ws = true;
                 continue;
             }
 
             cur_group.push(i);
+            was_ws = false;
         }
         if !cur_group.is_empty() {
             glyph_groups.push(cur_group);
@@ -191,10 +204,10 @@ impl Text {
             let mut breaks = Vec::new();
             let mut cur_break = Chunk::empty();
             for idx in group {
-                let glyph = data.glyphs[idx];
+                let character = data.glyphs[idx].character;
                 let metrics = data.metrics[idx];
 
-                if glyph.character == '\n' || glyph.character == '\r' {
+                if character == '\n' || character == '\r' {
                     lines.push(cur_line.clone());
                     lines.push(Chunk::new(vec![idx], 0.0));
                     cur_line.reset();
@@ -202,9 +215,6 @@ impl Text {
                 }
 
                 let line_width = cur_line.width + cur_break.width;
-                if line_width == 0.0 && glyph.character == ' ' {
-                    continue;
-                }
 
                 if line_width + metrics.width as f32 > max_width {
                     breaks.push(cur_break.clone());
