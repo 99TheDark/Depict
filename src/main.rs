@@ -127,16 +127,16 @@ impl<'a> System<'a> for Game {
 
         ctx.draw(
             Text::new(
-                ctx.mouse.pos.x,
+                0.0,
                 ctx.mouse.pos.y,
-                "Whereas disregard and contempt for human rights have resulted in barbarous acts."
+                "Whereas disregard and contempt\n for human rights have\nresulted in barbarous acts.\rok?"
                     .to_string(),
                 self.roboto,
             )
             .with_size(50.0)
             .with_color(Color::WHITE)
-            .with_width(ctx.size.width as f32 - ctx.mouse.pos.x)
-            .with_align(Align::Center)
+            // .with_width(ctx.size.width as f32)
+            .with_align(Align::Left)
             .with_emphasis(FontEmphasis::Italic)
             .with_thickness(FontThickness::Bold),
         );

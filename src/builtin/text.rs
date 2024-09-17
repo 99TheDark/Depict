@@ -125,10 +125,22 @@ impl Renderable for Text {
 
         let mut calc_x = 0.0;
         let mut calc_y = 0.0;
-        for line in lines {
+        'outer: for line in lines {
             for idx in line.indices {
                 let glyph = data.glyphs[idx];
                 let metrics = data.metrics[idx];
+
+                match glyph.character {
+                    '\n' => {
+                        continue 'outer;
+                    }
+                    '\r' => {
+                        calc_x = 0.0;
+                        calc_y -= vertical_shift;
+                        continue 'outer;
+                    }
+                    _ => {}
+                }
 
                 let x = self.x + calc_x + metrics.xmin as f32;
                 let y = self.y + calc_y - metrics.ymin as f32;
@@ -175,15 +187,22 @@ impl Text {
         let mut lines = Vec::new();
         let mut cur_line = Chunk::empty();
         let mut width = 0.0;
-        for group in glyph_groups {
+        'outer: for group in glyph_groups {
             let mut breaks = Vec::new();
             let mut cur_break = Chunk::empty();
             for idx in group {
                 let glyph = data.glyphs[idx];
                 let metrics = data.metrics[idx];
 
+                if glyph.character == '\n' || glyph.character == '\r' {
+                    lines.push(cur_line.clone());
+                    lines.push(Chunk::new(vec![idx], 0.0));
+                    cur_line.reset();
+                    continue 'outer;
+                }
+
                 let line_width = cur_line.width + cur_break.width;
-                if line_width == 0.0 && (glyph.character == ' ' || glyph.character == '\n') {
+                if line_width == 0.0 && glyph.character == ' ' {
                     continue;
                 }
 
