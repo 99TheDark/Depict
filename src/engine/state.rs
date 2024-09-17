@@ -27,6 +27,7 @@ use crate::{
 };
 
 use super::{
+    dimension::Dimension,
     properties::{Properties, Size},
     renderer::Renderer,
     shader::Shader,
@@ -117,7 +118,7 @@ impl<'a> State<'a> {
         let mut ctx = PartialContext {
             img_sources: Vec::new(),
             font_sources: Vec::new(),
-            size,
+            size: Dimension::new(size.width as f32, size.height as f32),
         };
 
         system.borrow_mut().init(&mut ctx);
@@ -310,7 +311,7 @@ impl<'a> State<'a> {
         let mut renderer = Renderer::new();
         let mut ctx = Context {
             step: ContextStep::Render,
-            size: self.size,
+            size: Dimension::new(self.size.width as f32, self.size.height as f32),
             assets: &mut self.assets,
             window_size: self.properties.size,
             mouse: &self.mouse,
@@ -329,7 +330,7 @@ impl<'a> State<'a> {
     pub fn update(&mut self) {
         self.system.borrow_mut().update(&mut Context {
             step: ContextStep::Update,
-            size: self.size,
+            size: Dimension::new(self.size.width as f32, self.size.height as f32),
             assets: &mut self.assets,
             window_size: self.properties.size,
             mouse: &self.mouse,

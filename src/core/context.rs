@@ -6,7 +6,7 @@ use wgpu::Queue;
 use winit::window::Window;
 
 use crate::{
-    engine::{properties::Size, renderer::Renderer},
+    engine::{dimension::Dimension, properties::Size, renderer::Renderer},
     graphics::{
         asset::{Asset, Assets, Font, Image},
         font::{FontEmphasis, FontThickness},
@@ -19,7 +19,7 @@ use super::renderable::Renderable;
 pub struct PartialContext {
     pub(crate) img_sources: Vec<(u32, DynamicImage)>,
     pub(crate) font_sources: Vec<(u32, HashMap<(FontThickness, FontEmphasis), fontdue::Font>)>,
-    pub size: Size,
+    pub size: Dimension<f32>,
 }
 
 impl PartialContext {
@@ -63,7 +63,7 @@ pub struct Context<'a> {
     pub(crate) step: ContextStep,
     pub(crate) window: Arc<Window>,
     pub(crate) assets: &'a mut Assets,
-    pub size: Size,
+    pub size: Dimension<f32>,
     pub window_size: Size,
     pub mouse: &'a Tracker<Mouse>,
     pub keyboard: &'a Tracker<Keyboard>,

@@ -101,13 +101,13 @@ impl<'a> System<'a> for Game {
     fn render(&mut self, ctx: &mut Context) {
         ctx.draw_all(vec![
             Rectangle::new(0.0, 0.0, 200.0, 200.0).with_background(Background::Color(Color::BLUE)),
-            Rectangle::new(ctx.size.width as f32 - 200.0, 0.0, 200.0, 200.0)
+            Rectangle::new(ctx.size.width - 200.0, 0.0, 200.0, 200.0)
                 .with_background(Background::Color(Color::BLUE)),
-            Rectangle::new(0.0, ctx.size.height as f32 - 200.0, 200.0, 200.0)
+            Rectangle::new(0.0, ctx.size.height - 200.0, 200.0, 200.0)
                 .with_background(Background::Color(Color::BLUE)),
             Rectangle::new(
-                ctx.size.width as f32 - 200.0,
-                ctx.size.height as f32 - 200.0,
+                ctx.size.width - 200.0,
+                ctx.size.height - 200.0,
                 200.0,
                 200.0,
             )
@@ -127,7 +127,7 @@ impl<'a> System<'a> for Game {
 
         ctx.draw(
             Text::new(
-                0.0,
+                ctx.size.width / 2.0,
                 ctx.mouse.pos.y,
                 "Whereas disregard and contempt\n for human rights have\nresulted in barbarous acts.\rok?"
                     .to_string(),
@@ -135,8 +135,8 @@ impl<'a> System<'a> for Game {
             )
             .with_size(50.0)
             .with_color(Color::WHITE)
-            // .with_width(ctx.size.width as f32)
-            .with_align(Align::Left)
+            // .with_width(ctx.size.width)
+            .with_align(Align::Center)
             .with_emphasis(FontEmphasis::Italic)
             .with_thickness(FontThickness::Bold),
         );
