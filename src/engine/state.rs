@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, iter, rc::Rc, sync::Arc, time::SystemTime};
 
 use bytemuck::cast_slice;
-use glam::Mat4;
+use glam::{Affine2, Mat4};
 use wgpu::{
     Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
     BindGroupLayoutEntry, BindingResource, BindingType, Buffer, Color, CommandEncoderDescriptor,
@@ -14,6 +14,7 @@ use wgpu::{
 use winit::window::Window;
 
 use crate::{
+    component::{dimension::Dimension, screen::fit, time::Time},
     core::{
         context::{Context, ContextStep, PartialContext},
         settings::Settings,
@@ -28,16 +29,17 @@ use crate::{
 };
 
 use super::{
-    dimension::Dimension,
-    properties::{Properties, Size},
+    properties::Properties,
     renderer::Renderer,
     shader::Shader,
-    time::Time,
+    size::Size,
     uniforms::{TransformationData, Uniform, Uniforms},
 };
 
 pub(crate) struct State<'a> {
     pub(crate) size: Size,
+    pub(crate) window_size: Size,
+    pub(crate) screen: Affine2,
     pub(crate) assets: Assets,
     pub(crate) instance: Instance,
     pub(crate) surface: Surface<'a>,
@@ -127,7 +129,7 @@ impl<'a> State<'a> {
         system.borrow_mut().init(&mut ctx);
 
         // TODO: Fix, temporary cap (needs to expand and start at some minimum)
-        let max_size = Limits::default().max_texture_dimension_2d * 0 + 512;
+        let max_size = Limits::default().max_texture_dimension_2d * 0 + 1024;
 
         let mut image_atlas = Atlas::new(&device, max_size);
         image_atlas.sources = ctx.img_sources;
@@ -271,8 +273,7 @@ impl<'a> State<'a> {
         );
 
         let properties = Properties {
-            size,
-            aspect: size.aspect(), // Could just be combined...
+            scale_factor: window.scale_factor() as f32,
         };
 
         let mouse = Tracker::new(Mouse::new());
@@ -283,6 +284,8 @@ impl<'a> State<'a> {
 
         State {
             size,
+            window_size: size,
+            screen: Affine2::IDENTITY,
             assets,
             instance,
             surface,
@@ -320,7 +323,7 @@ impl<'a> State<'a> {
             step: ContextStep::Render,
             size: Dimension::new(self.size.width as f32, self.size.height as f32),
             assets: &mut self.assets,
-            window_size: self.properties.size,
+            window_size: self.window_size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             time: &self.time,
@@ -330,7 +333,7 @@ impl<'a> State<'a> {
         };
 
         self.system.borrow_mut().render(&mut ctx);
-        ctx.render(&self.queue);
+        ctx.render(&self.queue, &self.properties);
 
         renderer.build(&self.device)
     }
@@ -340,7 +343,7 @@ impl<'a> State<'a> {
             step: ContextStep::Update,
             size: Dimension::new(self.size.width as f32, self.size.height as f32),
             assets: &mut self.assets,
-            window_size: self.properties.size,
+            window_size: self.window_size,
             mouse: &self.mouse,
             keyboard: &self.keyboard,
             time: &self.time,
@@ -403,18 +406,19 @@ impl<'a> State<'a> {
 
     pub fn resize(&mut self, new_size: Size) {
         if new_size.width > 0 && new_size.height > 0 {
-            self.properties.size = new_size;
+            self.window_size = new_size;
             (self.config.width, self.config.height) = (new_size.width, new_size.height);
 
             self.surface.configure(&self.device, &self.config);
 
-            // This code is gross but idk how to fix it
-            self.uniforms.transformation.data.update(
+            self.screen = fit(
                 self.size.width as f32,
                 self.size.height as f32,
                 new_size.width as f32,
                 new_size.height as f32,
             );
+
+            self.uniforms.transformation.data.update(self.screen);
             self.queue.write_buffer(
                 &self.uniforms.transformation.buffer,
                 0,
@@ -430,6 +434,6 @@ impl<'a> State<'a> {
 
     pub fn reload(&mut self) {
         self.update_surface();
-        self.resize(self.properties.size);
+        self.resize(self.window_size);
     }
 }

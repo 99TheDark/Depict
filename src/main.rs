@@ -1,4 +1,5 @@
 pub mod builtin;
+pub mod component;
 pub mod core;
 pub mod engine;
 pub mod graphics;
@@ -8,7 +9,6 @@ use core::properties::Align;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use builtin::{rectangle::Rectangle, text::Text};
-use engine::id::ID_FACTORY;
 use graphics::{
     asset::{Asset, Font, Image},
     color::Color,
@@ -130,17 +130,38 @@ impl<'a> System<'a> for Game {
         ]);
 
         ctx.draw(
+                    Text::new(
+                        ctx.size.width / 2.0,
+                        0.0,
+                        "Lorem ipsum odor amet, consectetuer adipiscing elit. Accumsan eget dis rhoncus nec consequat id. Facilisi praesent tortor lacinia libero parturient aptent euismod neque nunc. Integer auctor ipsum gravida metus euismod nibh sodales tortor. Mi interdum est ac feugiat rhoncus ultricies blandit. Lacus aliquet sociosqu taciti ad taciti ridiculus lacus conubia ad. Taciti euismod sit consequat nec facilisis class. Interdum lacinia urna tristique sollicitudin fermentum senectus odio sed.
+
+        Ad blandit mollis nullam parturient diam tristique purus nibh. Aliquet fermentum bibendum suspendisse felis pretium fames tempor. Dui magnis ante faucibus justo fames ullamcorper ante malesuada. Euismod semper finibus consequat dictum nec. Accumsan aenean class nisi hendrerit fusce sed tempor. Gravida dignissim montes suspendisse consequat amet dapibus.
+
+        Auctor euismod torquent lobortis volutpat semper feugiat ullamcorper. Dictum maximus lectus nibh vulputate nisi. Urna iaculis urna interdum praesent nisl ad. Ad tempus penatibus pulvinar sit faucibus quisque porta praesent. Maximus bibendum tortor; libero taciti etiam elementum! Sit phasellus class; quis aptent euismod morbi rhoncus. Eget ac magna nulla himenaeos per commodo. Eu etiam maecenas viverra; finibus elementum justo fusce nam. Natoque dis mauris bibendum arcu inceptos sed potenti nunc.
+
+        Libero rutrum ut elit cursus sapien conubia dui arcu. At inceptos lacinia, venenatis fringilla id ut elit. Libero finibus phasellus amet posuere lorem. Iaculis efficitur accumsan primis habitasse facilisi etiam torquent. Pharetra montes tristique mi per id; velit curae. Condimentum ex adipiscing tellus orci sed. Taciti adipiscing laoreet consequat commodo suspendisse ultricies.
+
+        Facilisis sem mus mollis ligula dolor, auctor massa luctus. Blandit a placerat himenaeos nostra vehicula sagittis. Pharetra fusce aliquet turpis dapibus potenti. Enim eu urna venenatis leo natoque blandit odio euismod. Libero condimentum dui cras in duis luctus natoque. Ipsum arcu luctus ornare facilisi curae lobortis. Magnis neque quam duis; magna dignissim potenti ornare. Parturient imperdiet efficitur risus turpis pretium curae elementum. Lacinia lectus elit elit; lacus cubilia mus."
+                            .to_string(),
+                        self.roboto,
+                    )
+                    .with_color(Color::WHITE)
+                    .with_align(Align::Center)
+                    .with_width(ctx.size.width)
+                );
+
+        ctx.draw(
             Text::new(
                 self.text_pos,
                 ctx.mouse.pos.y,
-                "Whereas disregard and contempt for human rights have resulted in barbarous acts.            Supercalifragilisticexpialadocious"
+                "Whereas disregard and contempt for human rights have resulted in barbarous acts."
                     .to_string(),
                 self.roboto,
             )
-            .with_size(50.0)
-            .with_color(Color::WHITE)
+            .with_size(30.0)
+            .with_color(Color::RED)
             .with_align(Align::Center)
-            .with_width(ctx.size.width*0.5)
+            .with_width(ctx.size.width * 0.5)
             .with_emphasis(FontEmphasis::Italic)
             .with_thickness(FontThickness::Bold),
         );

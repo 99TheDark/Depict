@@ -1,7 +1,7 @@
 use core::fmt::Debug;
 
 use bytemuck::{cast_slice, Pod, Zeroable};
-use glam::{Affine2, Mat3, Vec2};
+use glam::{Affine2, Mat3};
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
     BindGroup, BindGroupEntry, BindGroupLayoutEntry, BindingType, Buffer, BufferBindingType,
@@ -61,23 +61,8 @@ pub(crate) struct TransformationData {
 }
 
 impl TransformationData {
-    pub fn update(&mut self, width: f32, height: f32, new_width: f32, new_height: f32) {
-        let aspect = width / height;
-        let new_aspect = new_width / new_height;
-        let (width_factor, height_factor) = if new_aspect > aspect {
-            (aspect / new_aspect, 1.0)
-        } else {
-            (1.0, new_aspect / aspect)
-        };
-
-        let transformation_matrix = Affine2::from_translation(Vec2::new(
-            -1.0 + 1.0 - width_factor,
-            1.0 - 1.0 + height_factor,
-        )) * Affine2::from_scale(Vec2::new(
-            2.0 / width * width_factor,
-            -2.0 / height * height_factor,
-        ));
-        let affine = Mat3::from(transformation_matrix).to_cols_array_2d();
+    pub fn update(&mut self, screen: Affine2) {
+        let affine = Mat3::from(screen).to_cols_array_2d();
 
         self.transformation = [
             [affine[0][0], affine[1][0], 0.0, affine[2][0]],

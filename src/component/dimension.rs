@@ -1,8 +1,6 @@
 use glam::Vec2;
 use num::Num;
 
-use super::properties::Size;
-
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Dimension<T: Num + Copy> {
     pub width: T,

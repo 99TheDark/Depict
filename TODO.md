@@ -9,6 +9,6 @@
 - Move bind groups to atlas
 - Switch atlas to use `IDFactory`
 - Cap font resolution
-- Long-term caching of `TextRenderingData`
+- Long-term caching of `TextRenderingData` (REALLY important for speed)
 - Setting to disable resizing
 - Setting to disable aspect ratio keeping

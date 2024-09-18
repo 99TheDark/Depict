@@ -4,7 +4,7 @@ use fontdue::Metrics;
 use image::{DynamicImage, RgbaImage};
 
 use super::{atlas::Atlas, glyph::TextRenderingData};
-use crate::{builtin::text::POINT_TO_PIXELS, graphics::font};
+use crate::graphics::font;
 
 #[derive(Debug)]
 pub struct FontAsset {
@@ -36,10 +36,7 @@ impl FontAsset {
                 let font = &self.fonts[&glyph.font_id];
                 let font_style = &font.styles[&(glyph.thickness, glyph.emphasis)];
 
-                // Convert pt to px
-                let size = glyph.size * POINT_TO_PIXELS;
-
-                let (font_metrics, bitmap) = font_style.rasterize(glyph.character, size);
+                let (font_metrics, bitmap) = font_style.rasterize(glyph.character, glyph.size);
                 metrics.push(font_metrics);
 
                 let width = font_metrics.width;

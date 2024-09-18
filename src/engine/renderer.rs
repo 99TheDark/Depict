@@ -1,5 +1,5 @@
 use bytemuck::cast_slice;
-use glam::{Affine2, Vec2};
+use glam::Vec2;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
     Buffer, BufferUsages, Device,
@@ -15,24 +15,11 @@ pub struct RenderBatch<'a> {
     pub(crate) assets: &'a mut Assets,
     renderer: &'a mut Renderer,
     vertices: Vec<Vertex>,
-    // transformation: Affine2,
     pub(crate) lower_bound: Vec2,
     pub(crate) upper_bound: Vec2,
 }
 
 impl<'a> RenderBatch<'a> {
-    /*fn translate(&mut self, by: Vec2) {
-        self.transformation *= Affine2::from_translation(by);
-    }
-
-    fn scale(&mut self, by: Vec2) {
-        self.transformation *= Affine2::from_scale(by);
-    }
-
-    fn rotate(&mut self, by: f32) {
-        self.transformation *= Affine2::from_angle(by);
-    }*/
-
     pub fn triangle(&mut self, a: Vertex, b: Vertex, c: Vertex) {
         let lower_x = f32::min(
             f32::min(a.pos[0], b.pos[0]),

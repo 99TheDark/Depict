@@ -8,7 +8,7 @@ use winit::{
 
 use crate::core::{settings::Settings, system::System};
 
-use super::{properties::Size, state::State};
+use super::{size::Size, state::State};
 
 pub(crate) struct AppData<'a> {
     pub system: Rc<RefCell<dyn System<'a>>>,
@@ -67,7 +67,7 @@ impl<'a> ApplicationHandler for App<'a> {
             _ => {}
         }
 
-        state.mouse.update(&event);
+        state.mouse.update(&event, state.size, state.window_size);
         state.keyboard.update(&event);
 
         state.update();

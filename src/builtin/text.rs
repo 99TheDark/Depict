@@ -5,7 +5,7 @@ use crate::{
         properties::{Align, OverflowBreak},
         renderable::Renderable,
     },
-    engine::{renderer::RenderBatch, shader::Vertex},
+    engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
     graphics::{
         asset::{Asset, Assets, Font},
         color::Color,
@@ -13,8 +13,6 @@ use crate::{
         glyph::{Glyph, TextRenderingData},
     },
 };
-
-pub(crate) const POINT_TO_PIXELS: f32 = 4.0 / 3.0;
 
 shape!(
     pub struct Text {
@@ -82,14 +80,14 @@ impl Chunk {
 }
 
 impl Renderable for Text {
-    fn request(&self, assets: &mut Assets) {
+    fn request(&self, assets: &mut Assets, properties: &Properties) {
         let mut glyphs = Vec::new();
         for character in self.text.chars() {
             glyphs.push(Glyph {
                 character,
                 font_id: self.font.id,
                 image_id: u32::MAX,
-                size: self.size,
+                size: self.size * properties.scale_factor,
                 color: self.color,
                 thickness: self.thickness,
                 emphasis: self.emphasis,
@@ -106,7 +104,8 @@ impl Renderable for Text {
     }
 
     // TODO: Add support for vertical fonts
-    fn render(&self, batch: &mut RenderBatch) {
+    // TODO: Make this faster; it is unbearably slow
+    fn render(&self, batch: &mut RenderBatch, properties: &Properties) {
         let max_width = if let Some(width) = self.width {
             width
         } else {
@@ -114,7 +113,7 @@ impl Renderable for Text {
         };
 
         let data = batch.assets.fonts.data[&self.id].clone();
-        let (lines, used_width) = self.lines(&data, max_width);
+        let (lines, used_width) = self.lines(&data, max_width, properties.scale_factor);
 
         let total_width = if let Some(width) = self.width {
             width
@@ -122,7 +121,7 @@ impl Renderable for Text {
             used_width
         };
 
-        let size = self.size * POINT_TO_PIXELS;
+        let size = self.size * properties.scale_factor;
         let vertical_shift = size * self.line_height;
 
         let mut calc_x = 0.0;
@@ -140,11 +139,6 @@ impl Renderable for Text {
                         calc_x = 0.0;
                         calc_y -= vertical_shift;
                         continue 'outer;
-                    }
-                    ' ' | '\t' => {
-                        if calc_x == 0.0 {
-                            //continue;
-                        }
                     }
                     _ => {}
                 }
@@ -174,7 +168,7 @@ impl Renderable for Text {
 
 impl Text {
     // Chunks of glyph and metrics indicies by line, alongside the bounding width
-    fn lines(&self, data: &TextRenderingData, max_width: f32) -> (Vec<Chunk>, f32) {
+    fn lines(&self, data: &TextRenderingData, max_width: f32, scale: f32) -> (Vec<Chunk>, f32) {
         let mut glyph_groups = Vec::new();
         let mut cur_group = Vec::new();
         let mut was_ws = false;
@@ -256,7 +250,7 @@ impl Text {
             lines.push(cur_line);
         }
 
-        (lines, width * POINT_TO_PIXELS)
+        (lines, width * scale)
     }
 
     fn draw_char(

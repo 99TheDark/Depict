@@ -11,15 +11,17 @@ use wgpu::{
     TextureFormat, TextureUsages, TextureView, TextureViewDescriptor,
 };
 
+use crate::component::memory::Memory;
+
 use super::image::Image;
 
 #[derive(Debug)]
 pub struct Atlas {
-    pub(crate) sources: Vec<(u32, DynamicImage)>,
+    pub(crate) sources: Vec<(u32, Memory<DynamicImage>)>,
     pub(crate) images: HashMap<u32, Image>,
     pub size: u32,
     // pub max_size: u32,
-    pub extent: Extent3d,
+    pub(crate) extent: Extent3d,
     pub(crate) texture: Texture,
     pub(crate) view: TextureView,
     pub(crate) sampler: Sampler,
@@ -107,7 +109,7 @@ impl Atlas {
                 },
             );
 
-            let bytes = image.clone().into_rgba8().to_vec();
+            let bytes = image.value.clone().into_rgba8().to_vec();
             for y in 0..location.height() {
                 for x in 0..location.width() {
                     let src_idx = (x + y * location.width()) as usize * 4;
@@ -138,6 +140,9 @@ impl Atlas {
             self.extent,
         );
 
+        for (_, source) in &mut self.sources {
+            source.remembered = false;
+        }
         self.edited = false;
 
         /*DynamicImage::ImageRgba8(image::RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
@@ -150,12 +155,28 @@ impl Atlas {
     }
 
     pub fn add(&mut self, source: DynamicImage) -> u32 {
+        // Faster lookup, maybe hash one commonly varying attribute about source?
+        for (cur_id, cur_source) in &mut self.sources {
+            if source == **cur_source {
+                cur_source.remembered = true;
+                return *cur_id;
+            }
+        }
+
         // Breaks if images are removed
         let id = self.sources.len() as u32;
-        self.sources.push((id, source));
+        self.sources.push((id, Memory::new(source)));
 
         self.edited = true;
 
         id
+    }
+
+    pub fn sweep(&mut self) {
+        /*for i in (0..self.sources.len()).rev() {
+            if !self.sources[i].remembered {
+                self.sources.remove(i);
+            }
+        }*/
     }
 }

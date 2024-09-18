@@ -2,7 +2,7 @@ use depict_macro::shape;
 
 use crate::{
     core::{properties::Background, renderable::Renderable},
-    engine::{renderer::RenderBatch, shader::Vertex},
+    engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
     graphics::{asset::Assets, color::Color},
 };
 
@@ -18,9 +18,9 @@ shape!(
 );
 
 impl Renderable for Rectangle {
-    fn request(&self, _assets: &mut Assets) {}
+    fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
-    fn render(&self, batch: &mut RenderBatch) {
+    fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
         match self.background {
             Background::Color(color) => {
                 batch.triangle(

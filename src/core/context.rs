@@ -6,7 +6,8 @@ use wgpu::Queue;
 use winit::window::Window;
 
 use crate::{
-    engine::{dimension::Dimension, properties::Size, renderer::Renderer, time::Time},
+    component::{dimension::Dimension, memory::Memory, time::Time},
+    engine::{properties::Properties, renderer::Renderer, size::Size},
     graphics::{
         asset::{Asset, Assets, Font, Image},
         font::{FontEmphasis, FontThickness},
@@ -17,7 +18,7 @@ use crate::{
 use super::renderable::Renderable;
 
 pub struct PartialContext {
-    pub(crate) img_sources: Vec<(u32, DynamicImage)>,
+    pub(crate) img_sources: Vec<(u32, Memory<DynamicImage>)>,
     pub(crate) font_sources: Vec<(u32, HashMap<(FontThickness, FontEmphasis), fontdue::Font>)>,
     pub size: Dimension<f32>,
 }
@@ -27,7 +28,7 @@ impl PartialContext {
         let id = self.img_sources.len() as u32;
         let image = image::load_from_memory(bytes).unwrap();
 
-        self.img_sources.push((id, image));
+        self.img_sources.push((id, Memory::new(image)));
 
         Asset::new(id)
     }
@@ -94,18 +95,17 @@ impl<'a> Context<'a> {
         );
     }
 
-    pub(crate) fn render(&mut self, queue: &Queue) {
+    pub(crate) fn render(&mut self, queue: &Queue, properties: &Properties) {
         let renderer = self.renderer.as_mut().unwrap();
 
-        let mut batch = renderer.batch(&mut self.assets, true);
+        // Putting true on TANKS performance since it is a double for loop
+        let mut batch = renderer.batch(&mut self.assets, false);
 
         // Not the way to go at all (need to cache and delete the ones not used again or something)
-        batch.assets.fonts.atlas.sources.clear();
-        batch.assets.fonts.atlas.images.clear();
         batch.assets.fonts.data.clear();
 
         for renderable in &self.renderables {
-            renderable.request(&mut batch.assets);
+            renderable.request(&mut batch.assets, &properties);
         }
 
         batch.assets.fonts.update();
@@ -114,7 +114,7 @@ impl<'a> Context<'a> {
         batch.assets.fonts.atlas.update(&queue);
 
         for renderable in &self.renderables {
-            renderable.render(&mut batch);
+            renderable.render(&mut batch, &properties);
         }
         batch.finish();
     }

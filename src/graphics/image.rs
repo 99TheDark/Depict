@@ -7,15 +7,6 @@ pub struct Image {
     pub height: f32,
 }
 
-impl Image {
-    pub(crate) fn new(id: u32) -> Self {
-        Self {
-            id,
-            ..Default::default()
-        }
-    }
-}
-
 impl Default for Image {
     fn default() -> Self {
         Self {

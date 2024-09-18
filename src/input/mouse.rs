@@ -4,6 +4,8 @@ use winit::{
     event::{ElementState, MouseButton, MouseScrollDelta, TouchPhase, WindowEvent},
 };
 
+use crate::{component::screen::factors, engine::size::Size};
+
 #[derive(Debug, Copy, Clone)]
 pub struct Mouse {
     pub inside: bool,
@@ -30,11 +32,22 @@ impl Mouse {
         self.state.is_pressed()
     }
 
-    pub fn update(&mut self, event: &WindowEvent) {
+    pub fn update(&mut self, event: &WindowEvent, size: Size, window_size: Size) {
         match event {
             WindowEvent::CursorMoved { position, .. } => {
-                self.pos.x = position.x as f32;
-                self.pos.y = position.y as f32;
+                // Make this baked into state.screen which can simplify the code below
+                let (width_factor, height_factor) = factors(
+                    size.width as f32,
+                    size.height as f32,
+                    window_size.width as f32,
+                    window_size.height as f32,
+                );
+
+                // This really needs to be simplified
+                self.pos.x = width_factor
+                    * (position.x as f32 - (1.0 - width_factor) * window_size.width as f32 * 0.5);
+                self.pos.y = height_factor
+                    * (position.y as f32 + (1.0 - height_factor) * window_size.height as f32 * 0.5);
             }
             WindowEvent::CursorEntered { .. } => {
                 self.inside = true;
