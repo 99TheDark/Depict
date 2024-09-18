@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub(crate) struct IDFactory {
     counter: u32,
 }
@@ -18,4 +19,5 @@ impl IDFactory {
     }
 }
 
-pub(crate) static mut ID_FACTORY: IDFactory = IDFactory::new();
+// Move to renderable.rs?
+pub(crate) static mut RENDERABLE_ID_FACTORY: IDFactory = IDFactory::new();

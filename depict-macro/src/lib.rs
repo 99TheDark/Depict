@@ -105,7 +105,7 @@ pub fn shape(item: TokenStream) -> TokenStream {
         impl #name {
             pub fn new(#( #params )*) -> Self {
                 Self {
-                    id: unsafe { crate::component::id::ID_FACTORY.next() },
+                    id: unsafe { crate::component::id::RENDERABLE_ID_FACTORY.next() },
                     #( #defaults )*
                 }
             }

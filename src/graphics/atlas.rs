@@ -11,12 +11,13 @@ use wgpu::{
     TextureFormat, TextureUsages, TextureView, TextureViewDescriptor,
 };
 
-use crate::component::memory::Memory;
+use crate::component::{id::IDFactory, memory::Memory};
 
 use super::image::Image;
 
 #[derive(Debug)]
 pub struct Atlas {
+    pub(crate) id_factory: IDFactory,
     pub(crate) sources: Vec<(u32, Memory<DynamicImage>)>,
     pub(crate) images: HashMap<u32, Image>,
     pub size: u32,
@@ -60,6 +61,7 @@ impl Atlas {
         });
 
         Self {
+            id_factory: IDFactory::new(),
             sources: Vec::new(),
             images: HashMap::new(),
             size,
@@ -163,8 +165,7 @@ impl Atlas {
             }
         }
 
-        // Breaks if images are removed
-        let id = self.sources.len() as u32;
+        let id = self.id_factory.next();
         self.sources.push((id, Memory::new(source)));
 
         self.edited = true;
