@@ -9,51 +9,29 @@ use crate::graphics::asset::Assets;
 
 use super::shader::Vertex;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum TransformationEffect {
-    Absolute,
-    Relative,
-}
-
 #[derive(Debug)]
 pub struct RenderBatch<'a> {
     pub deduplicate: bool,
     pub(crate) assets: &'a mut Assets,
     renderer: &'a mut Renderer,
     vertices: Vec<Vertex>,
-    absolute_transformation: Affine2,
-    relative_transformation: Affine2,
-    pub effect: TransformationEffect,
+    // transformation: Affine2,
     pub(crate) lower_bound: Vec2,
     pub(crate) upper_bound: Vec2,
 }
 
 impl<'a> RenderBatch<'a> {
-    fn transform(&mut self, transformation: Affine2) {
-        match self.effect {
-            TransformationEffect::Absolute => self.absolute_transformation *= transformation,
-            TransformationEffect::Relative => self.relative_transformation *= transformation,
-        }
-    }
-
-    fn translate(&mut self, by: Vec2) {
-        self.transform(Affine2::from_translation(by));
+    /*fn translate(&mut self, by: Vec2) {
+        self.transformation *= Affine2::from_translation(by);
     }
 
     fn scale(&mut self, by: Vec2) {
-        self.transform(Affine2::from_scale(by));
+        self.transformation *= Affine2::from_scale(by);
     }
 
     fn rotate(&mut self, by: f32) {
-        self.transform(Affine2::from_angle(by));
-    }
-
-    fn apply(&self, initial: Vec2, pos: Vec2) -> Vec2 {
-        let relative = self.relative_transformation.transform_point2(initial);
-        let shifted = relative + pos;
-        let absolute = self.absolute_transformation.transform_point2(shifted);
-        absolute
-    }
+        self.transformation *= Affine2::from_angle(by);
+    }*/
 
     pub fn triangle(&mut self, a: Vertex, b: Vertex, c: Vertex) {
         let lower_x = f32::min(
@@ -119,9 +97,6 @@ impl Renderer {
             assets,
             renderer: self,
             vertices: Vec::new(),
-            absolute_transformation: Affine2::IDENTITY,
-            relative_transformation: Affine2::IDENTITY,
-            effect: TransformationEffect::Absolute,
             lower_bound: Vec2::ZERO,
             upper_bound: Vec2::ZERO,
         }

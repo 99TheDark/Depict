@@ -1,8 +1,5 @@
 # TODO
 - Clipping
-- World/view transformations
-    - Transform by size correction
-- Transformations
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)
 - Figure out what to do when out of space in atlas

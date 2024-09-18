@@ -1,6 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, iter, rc::Rc, sync::Arc, time::SystemTime};
 
 use bytemuck::cast_slice;
+use glam::Mat4;
 use wgpu::{
     Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
     BindGroupLayoutEntry, BindingResource, BindingType, Buffer, Color, CommandEncoderDescriptor,
@@ -32,7 +33,7 @@ use super::{
     renderer::Renderer,
     shader::Shader,
     time::Time,
-    uniforms::{ScaleData, Uniform, Uniforms},
+    uniforms::{TransformationData, Uniform, Uniforms},
 };
 
 pub(crate) struct State<'a> {
@@ -232,15 +233,15 @@ impl<'a> State<'a> {
         let mut uniform_layout_entries = Vec::new();
         let mut uniform_entries = Vec::new();
 
-        let scale_uniform = Uniform::new(
+        let transformation_uniform = Uniform::new(
             &device,
-            ScaleData {
-                scale: [1.0 / size.width as f32, 1.0 / size.height as f32],
+            TransformationData {
+                transformation: Mat4::IDENTITY.to_cols_array_2d(),
             },
-            Some("Scale Uniform"),
+            Some("Transformation Uniform"),
         );
 
-        scale_uniform.register(&mut uniform_layout_entries, &mut uniform_entries);
+        transformation_uniform.register(&mut uniform_layout_entries, &mut uniform_entries);
 
         let uniform_bind_group_layout =
             device.create_bind_group_layout(&BindGroupLayoutDescriptor {
@@ -256,7 +257,7 @@ impl<'a> State<'a> {
 
         let uniforms = Uniforms {
             bind_group: uniform_bind_group,
-            scale: scale_uniform,
+            transformation: transformation_uniform,
         };
 
         let shader = Shader::new("shaders/shader.wgsl", config.format);
@@ -408,14 +409,16 @@ impl<'a> State<'a> {
             self.surface.configure(&self.device, &self.config);
 
             // This code is gross but idk how to fix it
-            self.uniforms
-                .scale
-                .data
-                .update(new_size.width, new_size.height);
+            self.uniforms.transformation.data.update(
+                self.size.width as f32,
+                self.size.height as f32,
+                new_size.width as f32,
+                new_size.height as f32,
+            );
             self.queue.write_buffer(
-                &self.uniforms.scale.buffer,
+                &self.uniforms.transformation.buffer,
                 0,
-                cast_slice(&[self.uniforms.scale.data]),
+                cast_slice(&[self.uniforms.transformation.data]),
             );
         }
     }
