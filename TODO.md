@@ -11,3 +11,4 @@
 - Long-term caching of `TextRenderingData`
 - Setting to disable scaling up
 - Setting to disable aspect ratio keeping
+- Hide as much as possible from lib

@@ -81,6 +81,10 @@ impl Chunk {
 
 impl Renderable for Text {
     fn request(&self, assets: &mut Assets, properties: &Properties) {
+        if self.color == Color::CLEAR {
+            return;
+        }
+
         let mut glyphs = Vec::new();
         for character in self.text.chars() {
             glyphs.push(Glyph {
@@ -105,6 +109,10 @@ impl Renderable for Text {
 
     // TODO: Add support for vertical fonts
     fn render(&self, batch: &mut RenderBatch, properties: &Properties) {
+        if self.color == Color::CLEAR {
+            return;
+        }
+
         let max_width = if let Some(width) = self.width {
             width
         } else {

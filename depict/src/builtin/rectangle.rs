@@ -23,6 +23,10 @@ impl Renderable for Rectangle {
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
         match self.background {
             Background::Color(color) => {
+                if color == Color::CLEAR {
+                    return;
+                }
+
                 batch.triangle(
                     Vertex::new(self.x, self.y, 0.0, 0.0, color, u32::MAX),
                     Vertex::new(self.x + self.width, self.y, 0.0, 0.0, color, u32::MAX),
