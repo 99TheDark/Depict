@@ -128,7 +128,6 @@ impl<'a> State<'a> {
 
         system.borrow_mut().init(&mut ctx);
 
-        // TODO: Fix, temporary cap (needs to expand and start at some minimum)
         let initial_size = 256;
         let max_size = Limits::default().max_texture_dimension_2d;
 

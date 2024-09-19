@@ -104,7 +104,6 @@ impl Renderable for Text {
     }
 
     // TODO: Add support for vertical fonts
-    // TODO: Make this faster; it is unbearably slow
     fn render(&self, batch: &mut RenderBatch, properties: &Properties) {
         let max_width = if let Some(width) = self.width {
             width

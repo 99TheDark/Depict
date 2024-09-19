@@ -8,6 +8,6 @@
 - Complain about unloaded assets being used
 - Move bind groups to atlas
 - Cap font resolution
-- Long-term caching of `TextRenderingData` (REALLY important for speed)
-- Setting to disable resizing
+- Long-term caching of `TextRenderingData`
+- Setting to disable scaling up
 - Setting to disable aspect ratio keeping

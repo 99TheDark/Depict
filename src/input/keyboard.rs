@@ -42,7 +42,6 @@ impl Keyboard {
 }
 
 impl Tracker<Keyboard> {
-    // TODO: Fix additions, they don't work
     pub fn just_changed(&self) -> (Vec<&KeyEvent>, Vec<&KeyEvent>) {
         let last_keys: HashSet<_> = HashSet::from_iter(self.last.keys.keys());
         let cur_keys: HashSet<_> = HashSet::from_iter(self.keys.keys());
