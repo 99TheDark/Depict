@@ -1,11 +1,11 @@
 # TODO
-- Clipping
+- Clipping (remove out-of-bounds objects; though, this may be tricky when transformations are added)
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)
 - Figure out what to do when out of space in atlas
-- Add ellipses
+- Polygon (don't use shape macro)
 - Allow image backgrounds on circles/ellipses
-- Outlines/borders?
+- Add outlines/borders
 - Complain about unloaded assets being used
 - Move bind groups to atlas
 - Cap font resolution
