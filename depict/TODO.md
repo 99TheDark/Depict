@@ -1,0 +1,13 @@
+# TODO
+- Clipping
+- Comment documentation
+- Change from nearest neighbor to something else in settings (or image settings)
+- Figure out what to do when out of space in atlas
+- Add circle, ellipse, triangle, etc to renderer
+- Outlines/borders?
+- Complain about unloaded assets being used
+- Move bind groups to atlas
+- Cap font resolution
+- Long-term caching of `TextRenderingData`
+- Setting to disable scaling up
+- Setting to disable aspect ratio keeping

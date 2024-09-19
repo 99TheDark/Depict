@@ -72,16 +72,16 @@ impl Vertex {
 }
 
 pub struct Shader {
-    shader_name: String,
+    shader_path: String,
     vertex_entry: String,
     fragment_entry: String,
     pixel_format: TextureFormat,
 }
 
 impl Shader {
-    pub fn new(shader_name: &str, pixel_format: TextureFormat) -> Shader {
+    pub fn new(shader_path: &str, pixel_format: TextureFormat) -> Shader {
         return Shader {
-            shader_name: shader_name.to_string(),
+            shader_path: shader_path.to_string(),
             vertex_entry: "vs_main".to_string(),
             fragment_entry: "fs_main".to_string(),
             pixel_format,
@@ -94,8 +94,8 @@ impl Shader {
         bind_group_layouts: &[&BindGroupLayout],
     ) -> RenderPipeline {
         let mut os_path = current_dir().unwrap();
-        os_path.push("src/");
-        os_path.push(&self.shader_name);
+        os_path.push("depict/src/");
+        os_path.push(&self.shader_path);
 
         let file_path = os_path.into_os_string().into_string().unwrap();
 

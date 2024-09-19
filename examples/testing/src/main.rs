@@ -1,28 +1,21 @@
-pub mod builtin;
-pub mod component;
-pub mod core;
-pub mod engine;
-pub mod graphics;
-pub mod input;
-
-use core::properties::Align;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use builtin::{rectangle::Rectangle, text::Text};
-use graphics::{
-    asset::{Asset, Font, Image},
-    color::Color,
-    font::{FontEmphasis, FontThickness},
+use depict::{
+    builtin::{rectangle::Rectangle, text::Text},
+    core::{
+        context::{Context, PartialContext},
+        engine::Engine,
+        properties::{Align, Background},
+        settings::Settings,
+        system::System,
+    },
+    graphics::{
+        asset::{Asset, Font, Image},
+        color::Color,
+        font::{FontEmphasis, FontThickness},
+    },
 };
 use winit::keyboard::{KeyCode, PhysicalKey};
-
-use crate::core::{
-    context::{Context, PartialContext},
-    engine::Engine,
-    properties::Background,
-    settings::Settings,
-    system::System,
-};
 
 struct Game {
     dirt: Asset<Image>,
