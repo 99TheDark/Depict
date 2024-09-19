@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use depict::{
-    builtin::{rectangle::Rectangle, text::Text},
+    builtin::{circle::Circle, rectangle::Rectangle, text::Text, triangle::Triangle},
     core::{
         context::{Context, PartialContext},
         engine::Engine,
@@ -26,6 +26,7 @@ struct Game {
 
     text_pos: f32,
     typed: String,
+    circle_size: f32,
 }
 
 impl<'a> System<'a> for Game {
@@ -95,6 +96,7 @@ impl<'a> System<'a> for Game {
 
     fn update(&mut self, ctx: &mut Context) {
         self.text_pos = ctx.size.width / 2.0 + f32::sin(ctx.time.seconds() as f32) * 100.0;
+        self.circle_size = (f32::cos(ctx.time.seconds() as f32 * 0.5) + 1.0) * 200.0 + 25.0;
 
         for key in ctx.keyboard.just_pressed() {
             match key.physical_key {
@@ -161,6 +163,17 @@ impl<'a> System<'a> for Game {
             .with_emphasis(FontEmphasis::Italic)
             .with_thickness(FontThickness::Bold),
         );
+
+        ctx.draw(Triangle::new(100.0, 100.0, 50.0, 200.0, 150.0, 200.0).with_color(Color::RED));
+
+        ctx.draw(
+            Circle::new(
+                ctx.size.width / 2.0,
+                ctx.size.height / 2.0,
+                self.circle_size,
+            )
+            .with_color(Color::GREEN),
+        );
     }
 }
 
@@ -176,6 +189,7 @@ fn main() {
 
             text_pos: 0.0,
             typed: "".to_string(),
+            circle_size: 0.0,
         })),
     );
     engine.run();

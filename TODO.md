@@ -3,7 +3,8 @@
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)
 - Figure out what to do when out of space in atlas
-- Add circle, ellipse, triangle, etc to renderer
+- Add ellipses
+- Allow image backgrounds on circles/ellipses
 - Outlines/borders?
 - Complain about unloaded assets being used
 - Move bind groups to atlas
