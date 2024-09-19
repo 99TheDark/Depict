@@ -1,7 +1,9 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use depict::{
-    builtin::{circle::Circle, rectangle::Rectangle, text::Text, triangle::Triangle},
+    builtin::{
+        circle::Circle, ellipse::Ellipse, rectangle::Rectangle, text::Text, triangle::Triangle,
+    },
     core::{
         context::{Context, PartialContext},
         engine::Engine,
@@ -173,6 +175,16 @@ impl<'a> System<'a> for Game {
                 self.circle_size,
             )
             .with_color(Color::GREEN),
+        );
+
+        ctx.draw(
+            Ellipse::new(
+                ctx.size.width / 2.0,
+                ctx.size.height / 2.0 + 400.0,
+                (f32::sin(ctx.time.seconds() as f32) + 1.1) * 100.0,
+                (f32::cos(ctx.time.seconds() as f32 * 2.0 + 2.0) + 1.1) * 100.0,
+            )
+            .with_color(Color::MAGENTA),
         );
     }
 }
