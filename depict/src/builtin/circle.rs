@@ -14,6 +14,7 @@ shape!(
         y: f32,
         radius: f32,
         color: Color = Color::CLEAR,
+        resolution: f32 = 10.0,
     }
 );
 
@@ -25,7 +26,7 @@ impl Renderable for Circle {
             return;
         }
 
-        let segments = u32::max(f32::sqrt(self.radius * 10.0) as u32, 10);
+        let segments = u32::max(f32::sqrt(self.radius * self.resolution) as u32, 10);
         for i in 0..segments {
             let start_angle = TAU / segments as f32 * i as f32;
             let end_angle = TAU / segments as f32 * (i + 1) as f32;
