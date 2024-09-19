@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, HashMap};
 use image::{DynamicImage, GenericImageView};
 use rectangle_pack::{
     contains_smallest_box, pack_rects, volume_heuristic, GroupedRectsToPlace, RectToInsert,
-    TargetBin,
+    RectanglePackError, RectanglePackOk, TargetBin,
 };
 use wgpu::{
     AddressMode, Device, Extent3d, FilterMode, ImageCopyTexture, ImageDataLayout, Origin3d, Queue,
@@ -21,7 +21,7 @@ pub struct Atlas {
     pub(crate) sources: Vec<(u32, Memory<DynamicImage>)>,
     pub(crate) images: HashMap<u32, Image>,
     pub size: u32,
-    // pub max_size: u32,
+    pub max_size: u32,
     pub(crate) extent: Extent3d,
     pub(crate) texture: Texture,
     pub(crate) view: TextureView,
@@ -30,7 +30,7 @@ pub struct Atlas {
 }
 
 impl Atlas {
-    pub(crate) fn new(device: &Device, size: u32) -> Self {
+    pub(crate) fn new(device: &Device, size: u32, max_size: u32) -> Self {
         let extent = Extent3d {
             width: size,
             height: size,
@@ -65,6 +65,7 @@ impl Atlas {
             sources: Vec::new(),
             images: HashMap::new(),
             size,
+            max_size,
             extent,
             texture,
             view,
@@ -73,29 +74,49 @@ impl Atlas {
         }
     }
 
+    fn place(&mut self) -> Result<RectanglePackOk<u32, i32>, RectanglePackError> {
+        let mut placements = None;
+        while placements == None {
+            let mut rectangles = GroupedRectsToPlace::<u32>::new();
+            for (id, image) in &self.sources {
+                let (width, height) = image.dimensions();
+                rectangles.push_rect(*id, None, RectToInsert::new(width, height, 1));
+            }
+
+            let mut bins = BTreeMap::new();
+            bins.insert(0, TargetBin::new(self.size, self.size, 1));
+
+            // Eventually don't panic with no space
+            let attempt = pack_rects(
+                &rectangles,
+                &mut bins,
+                &volume_heuristic,
+                &contains_smallest_box,
+            );
+
+            match attempt {
+                Ok(configuration) => placements = Some(configuration),
+                Err(error) => {
+                    self.size *= 2;
+
+                    if self.size > self.max_size {
+                        self.size = self.max_size;
+                        return Err(error);
+                    }
+                }
+            }
+        }
+
+        Ok(placements.unwrap())
+    }
+
     pub(crate) fn update(&mut self, queue: &Queue) {
         if !self.edited {
             return;
         }
 
-        // Eventually start with smaller images
-        let mut rectangles = GroupedRectsToPlace::<u32>::new();
-        for (id, image) in &self.sources {
-            let (width, height) = image.dimensions();
-            rectangles.push_rect(*id, None, RectToInsert::new(width, height, 1));
-        }
-
-        let mut bins = BTreeMap::new();
-        bins.insert(0, TargetBin::new(self.size, self.size, 1));
-
-        // Eventually don't panic with no space
-        let placements = pack_rects(
-            &rectangles,
-            &mut bins,
-            &volume_heuristic,
-            &contains_smallest_box,
-        )
-        .unwrap();
+        // TODO: Don't just ignore the error...
+        let placements = self.place().unwrap();
 
         let mut rgba = vec![0; (self.size * self.size * 4) as usize];
         for (id, image) in &self.sources {

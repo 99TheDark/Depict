@@ -129,9 +129,10 @@ impl<'a> State<'a> {
         system.borrow_mut().init(&mut ctx);
 
         // TODO: Fix, temporary cap (needs to expand and start at some minimum)
-        let max_size = Limits::default().max_texture_dimension_2d * 0 + 1024;
+        let initial_size = 256;
+        let max_size = Limits::default().max_texture_dimension_2d;
 
-        let mut image_atlas = Atlas::new(&device, max_size);
+        let mut image_atlas = Atlas::new(&device, initial_size, max_size);
         image_atlas.sources = ctx.img_sources;
         image_atlas.edited = true;
 
@@ -173,7 +174,7 @@ impl<'a> State<'a> {
             ],
         });
 
-        let font_atlas = Atlas::new(&device, max_size);
+        let font_atlas = Atlas::new(&device, initial_size, max_size);
 
         let font_bind_group_layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
             label: Some("Font Bind Group Layout"),

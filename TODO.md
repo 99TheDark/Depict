@@ -7,8 +7,6 @@
 - Outlines/borders?
 - Complain about unloaded assets being used
 - Move bind groups to atlas
-- Switch atlas to use `IDFactory`
-    - Sweep unused assets
 - Cap font resolution
 - Long-term caching of `TextRenderingData` (REALLY important for speed)
 - Setting to disable resizing
