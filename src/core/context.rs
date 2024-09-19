@@ -117,6 +117,8 @@ impl<'a> Context<'a> {
             renderable.render(&mut batch, &properties);
         }
         batch.finish();
+
+        batch.assets.fonts.atlas.sweep();
     }
 
     pub fn show_cursor(&mut self) {

@@ -174,10 +174,10 @@ impl Atlas {
     }
 
     pub fn sweep(&mut self) {
-        /*for i in (0..self.sources.len()).rev() {
-            if !self.sources[i].remembered {
+        for i in (0..self.sources.len()).rev() {
+            if !self.sources[i].1.remembered {
                 self.sources.remove(i);
             }
-        }*/
+        }
     }
 }

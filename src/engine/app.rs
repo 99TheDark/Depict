@@ -73,6 +73,7 @@ impl<'a> ApplicationHandler for App<'a> {
         state.update();
 
         state.mouse.step();
+        state.keyboard.step();
     }
 
     fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
