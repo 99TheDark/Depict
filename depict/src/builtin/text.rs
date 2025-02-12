@@ -272,36 +272,27 @@ impl Text {
         let image = batch.assets.fonts.atlas.get(image_id).clone();
 
         batch.triangle(
-            Vertex::new(x, y, image.u, image.v + image.height, Color::CLEAR, 1),
-            Vertex::new(
+            Vertex::textured(x, y, image.u, image.v + image.height, 1),
+            Vertex::textured(
                 x + width,
                 y,
                 image.u + image.width,
                 image.v + image.height,
-                Color::CLEAR,
                 1,
             ),
-            Vertex::new(x, y - height, image.u, image.v, Color::CLEAR, 1),
+            Vertex::textured(x, y - height, image.u, image.v, 1),
         );
 
         batch.triangle(
-            Vertex::new(
+            Vertex::textured(
                 x + width,
                 y,
                 image.u + image.width,
                 image.v + image.height,
-                Color::CLEAR,
                 1,
             ),
-            Vertex::new(x, y - height, image.u, image.v, Color::CLEAR, 1),
-            Vertex::new(
-                x + width,
-                y - height,
-                image.u + image.width,
-                image.v,
-                Color::CLEAR,
-                1,
-            ),
+            Vertex::textured(x, y - height, image.u, image.v, 1),
+            Vertex::textured(x + width, y - height, image.u + image.width, image.v, 1),
         );
     }
 }

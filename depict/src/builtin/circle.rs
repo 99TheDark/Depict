@@ -40,9 +40,9 @@ impl Renderable for Circle {
         }
 
         batch.triangle(
-            Vertex::new(points[0].0, points[0].1, 0.0, 0.0, self.color, u32::MAX),
-            Vertex::new(points[1].0, points[1].1, 0.0, 0.0, self.color, u32::MAX),
-            Vertex::new(points[2].0, points[2].1, 0.0, 0.0, self.color, u32::MAX),
+            Vertex::colored(points[0].0, points[0].1, self.color),
+            Vertex::colored(points[1].0, points[1].1, self.color),
+            Vertex::colored(points[2].0, points[2].1, self.color),
         );
 
         // TODO: Optimize significantly, especially the array creation and replacement
@@ -69,9 +69,9 @@ impl Renderable for Circle {
                 updated_points.push(new_point);
 
                 batch.triangle(
-                    Vertex::new(cur_point.0, cur_point.1, 0.0, 0.0, self.color, u32::MAX),
-                    Vertex::new(next_point.0, next_point.1, 0.0, 0.0, self.color, u32::MAX),
-                    Vertex::new(new_point.0, new_point.1, 0.0, 0.0, self.color, u32::MAX),
+                    Vertex::colored(cur_point.0, cur_point.1, self.color),
+                    Vertex::colored(next_point.0, next_point.1, self.color),
+                    Vertex::colored(new_point.0, new_point.1, self.color),
                 );
             }
 

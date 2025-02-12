@@ -35,22 +35,16 @@ impl Renderable for Ellipse {
             let end_angle = TAU / segments as f32 * (i + 1) as f32;
 
             batch.triangle(
-                Vertex::new(self.x, self.y, 0.0, 0.0, self.color, u32::MAX),
-                Vertex::new(
+                Vertex::colored(self.x, self.y, self.color),
+                Vertex::colored(
                     self.x + self.x_radius * start_angle.cos(),
                     self.y + self.y_radius * start_angle.sin(),
-                    0.0,
-                    0.0,
                     self.color,
-                    u32::MAX,
                 ),
-                Vertex::new(
+                Vertex::colored(
                     self.x + self.x_radius * end_angle.cos(),
                     self.y + self.y_radius * end_angle.sin(),
-                    0.0,
-                    0.0,
                     self.color,
-                    u32::MAX,
                 ),
             );
         }

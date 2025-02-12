@@ -27,9 +27,9 @@ impl Renderable for Triangle {
         }
 
         batch.triangle(
-            Vertex::new(self.x1, self.y1, 0.0, 0.0, self.color, u32::MAX),
-            Vertex::new(self.x2, self.y2, 0.0, 0.0, self.color, u32::MAX),
-            Vertex::new(self.x3, self.y3, 0.0, 0.0, self.color, u32::MAX),
+            Vertex::colored(self.x1, self.y1, self.color),
+            Vertex::colored(self.x2, self.y2, self.color),
+            Vertex::colored(self.x3, self.y3, self.color),
         );
     }
 }
