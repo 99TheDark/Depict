@@ -26,30 +26,56 @@ impl Renderable for Circle {
             return;
         }
 
-        let segments = u32::max(f32::sqrt(self.radius * self.resolution) as u32, 10);
-        for i in 0..segments {
-            let start_angle = TAU / segments as f32 * i as f32;
-            let end_angle = TAU / segments as f32 * (i + 1) as f32;
+        let segments = u32::max(
+            (f32::powf(self.radius, 0.25) * self.resolution * 0.125) as u32,
+            3,
+        );
 
-            batch.triangle(
-                Vertex::new(self.x, self.y, 0.0, 0.0, self.color, u32::MAX),
-                Vertex::new(
-                    self.x + self.radius * start_angle.cos(),
-                    self.y + self.radius * start_angle.sin(),
-                    0.0,
-                    0.0,
-                    self.color,
-                    u32::MAX,
-                ),
-                Vertex::new(
-                    self.x + self.radius * end_angle.cos(),
-                    self.y + self.radius * end_angle.sin(),
-                    0.0,
-                    0.0,
-                    self.color,
-                    u32::MAX,
-                ),
-            );
+        let mut points = Vec::new();
+        for i in 0..3 {
+            points.push((
+                self.x + self.radius * (TAU / 3.0 * i as f32).sin(),
+                self.y + self.radius * (TAU / 3.0 * i as f32).cos(),
+            ));
+        }
+
+        batch.triangle(
+            Vertex::new(points[0].0, points[0].1, 0.0, 0.0, self.color, u32::MAX),
+            Vertex::new(points[1].0, points[1].1, 0.0, 0.0, self.color, u32::MAX),
+            Vertex::new(points[2].0, points[2].1, 0.0, 0.0, self.color, u32::MAX),
+        );
+
+        // TODO: Optimize significantly, especially the array creation and replacement
+        for _ in 0..segments {
+            let mut updated_points = Vec::new();
+            for j in 0..points.len() {
+                let cur_point = points[j];
+                let next_point = points[(j + 1) % points.len()];
+
+                let mid_x = (cur_point.0 + next_point.0) * 0.5;
+                let mid_y = (cur_point.1 + next_point.1) * 0.5;
+
+                let dx = mid_x - self.x;
+                let dy = mid_y - self.y;
+
+                let mag = (dx * dx + dy * dy).sqrt();
+
+                let new_point = (
+                    dx / mag * self.radius + self.x,
+                    dy / mag * self.radius + self.y,
+                );
+
+                updated_points.push(cur_point);
+                updated_points.push(new_point);
+
+                batch.triangle(
+                    Vertex::new(cur_point.0, cur_point.1, 0.0, 0.0, self.color, u32::MAX),
+                    Vertex::new(next_point.0, next_point.1, 0.0, 0.0, self.color, u32::MAX),
+                    Vertex::new(new_point.0, new_point.1, 0.0, 0.0, self.color, u32::MAX),
+                );
+            }
+
+            points = updated_points;
         }
     }
 }
