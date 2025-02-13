@@ -6,6 +6,8 @@ use crate::{
     graphics::{asset::Assets, color::Color},
 };
 
+use super::border::Border;
+
 shape!(
     pub struct Rectangle {
         x: f32,
@@ -13,7 +15,7 @@ shape!(
         width: f32,
         height: f32,
         background: Background = Background::Color(Color::CLEAR),
-        // border: Border = Border::NONE,
+        border: Border = Border::NONE,
     }
 );
 

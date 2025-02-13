@@ -8,13 +8,15 @@ use crate::{
     graphics::{asset::Assets, color::Color},
 };
 
+use super::border::Border;
+
 shape!(
     pub struct Circle {
         x: f32,
         y: f32,
         radius: f32,
         color: Color = Color::CLEAR,
-        resolution: f32 = 10.0,
+        border: Border = Border::NONE,
     }
 );
 
@@ -22,20 +24,20 @@ impl Renderable for Circle {
     fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
+        const ANGLE_STEP: f32 = TAU / 3.0;
+
         if self.color == Color::CLEAR {
             return;
         }
 
-        let segments = u32::max(
-            (f32::powf(self.radius, 0.25) * self.resolution * 0.125) as u32,
-            3,
-        );
+        let approximate_iterations = ((self.radius + self.border.thickness) / 3.0).ln();
+        let iterations = u32::max(approximate_iterations.round() as u32, 1);
 
-        let mut points = Vec::new();
+        let mut points = Vec::with_capacity(3);
         for i in 0..3 {
             points.push((
-                self.x + self.radius * (TAU / 3.0 * i as f32).sin(),
-                self.y + self.radius * (TAU / 3.0 * i as f32).cos(),
+                self.x + self.radius * (ANGLE_STEP * i as f32).sin(),
+                self.y + self.radius * (ANGLE_STEP * i as f32).cos(),
             ));
         }
 
@@ -46,8 +48,8 @@ impl Renderable for Circle {
         );
 
         // TODO: Optimize significantly, especially the array creation and replacement
-        for _ in 0..segments {
-            let mut updated_points = Vec::new();
+        for _ in 0..iterations {
+            let mut updated_points = Vec::with_capacity(points.len() * 2);
             for j in 0..points.len() {
                 let cur_point = points[j];
                 let next_point = points[(j + 1) % points.len()];
@@ -76,6 +78,37 @@ impl Renderable for Circle {
             }
 
             points = updated_points;
+        }
+
+        if self.border.thickness == 0.0 || self.border.color == Color::CLEAR {
+            return;
+        }
+
+        let mut border_points = Vec::with_capacity(points.len());
+        let multiplier = (self.border.thickness + self.radius) / self.radius;
+        for point in &points {
+            border_points.push((
+                (point.0 - self.x) * multiplier + self.x,
+                (point.1 - self.y) * multiplier + self.y,
+            ));
+        }
+
+        for i in 0..points.len() {
+            let cur_edge_point = points[i];
+            let next_edge_point = points[(i + 1) % points.len()];
+            let cur_border_point = border_points[i];
+            let next_border_point = border_points[(i + 1) % border_points.len()];
+
+            batch.triangle(
+                Vertex::colored(cur_edge_point.0, cur_edge_point.1, self.border.color),
+                Vertex::colored(next_edge_point.0, next_edge_point.1, self.border.color),
+                Vertex::colored(cur_border_point.0, cur_border_point.1, self.border.color),
+            );
+            batch.triangle(
+                Vertex::colored(next_edge_point.0, next_edge_point.1, self.border.color),
+                Vertex::colored(cur_border_point.0, cur_border_point.1, self.border.color),
+                Vertex::colored(next_border_point.0, next_border_point.1, self.border.color),
+            );
         }
     }
 }

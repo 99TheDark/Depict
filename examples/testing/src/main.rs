@@ -2,7 +2,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use depict::{
     builtin::{
-        circle::Circle, ellipse::Ellipse, rectangle::Rectangle, text::Text, triangle::Triangle,
+        border::Border, circle::Circle, ellipse::Ellipse, rectangle::Rectangle, text::Text,
+        triangle::Triangle,
     },
     core::{
         context::{Context, PartialContext},
@@ -174,10 +175,11 @@ impl<'a> System<'a> for Game {
                 ctx.size.height / 2.0,
                 self.circle_size,
             )
-            .with_color(Color::GREEN),
+            .with_color(Color::GREEN)
+            .with_border(Border::new(Color::WHITE, 30.0)),
         );
 
-        ctx.draw(
+        /*ctx.draw(
             Ellipse::new(
                 ctx.size.width / 2.0,
                 ctx.size.height / 2.0 + 400.0,
@@ -185,7 +187,7 @@ impl<'a> System<'a> for Game {
                 (f32::cos(ctx.time.seconds() as f32 * 2.0 + 2.0) + 1.1) * 100.0,
             )
             .with_color(Color::MAGENTA),
-        );
+        );*/
     }
 }
 

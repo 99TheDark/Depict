@@ -1,0 +1,18 @@
+use crate::graphics::color::Color;
+
+#[derive(Debug, Copy, Clone)]
+pub struct Border {
+    pub color: Color,
+    pub thickness: f32,
+}
+
+impl Border {
+    pub const NONE: Border = Border {
+        color: Color::CLEAR,
+        thickness: 0.0,
+    };
+
+    pub fn new(color: Color, thickness: f32) -> Self {
+        Self { color, thickness }
+    }
+}
