@@ -7,7 +7,7 @@ use wgpu::{
 
 use crate::graphics::asset::Assets;
 
-use super::shader::Vertex;
+use super::vertex::Vertex;
 
 #[derive(Debug)]
 pub struct RenderBatch<'a> {

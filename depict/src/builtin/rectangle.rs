@@ -3,7 +3,12 @@ use depict_macro::shape;
 use crate::{
     builtin::border_radius::BorderRadius,
     core::{properties::Background, renderable::Renderable},
-    engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
+    engine::{
+        properties::Properties,
+        renderer::RenderBatch,
+        vertex::Vertex,
+        vertex_builder::{VertexBuilder, VertexBuildingMode},
+    },
     graphics::{asset::Assets, color::Color},
 };
 
@@ -25,69 +30,25 @@ impl Renderable for Rectangle {
     fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
-        match self.background {
-            Background::Color(color) => {
-                if color == Color::CLEAR {
-                    return;
-                }
-
-                batch.triangle(
-                    Vertex::colored(self.x, self.y, color),
-                    Vertex::colored(self.x + self.width, self.y, color),
-                    Vertex::colored(self.x, self.y + self.height, color),
-                );
-                batch.triangle(
-                    Vertex::colored(self.x + self.width, self.y, color),
-                    Vertex::colored(self.x, self.y + self.height, color),
-                    Vertex::colored(self.x + self.width, self.y + self.height, color),
-                );
-            }
+        let builder = match self.background {
+            Background::Color(color) => VertexBuilder::new(VertexBuildingMode::Colored(color)),
             Background::Image(asset) => {
                 let image = batch.assets.images.get(asset.id).clone();
-
-                batch.triangle(
-                    Vertex::textured(self.x, self.y, image.u, image.v, 0),
-                    Vertex::textured(
-                        self.x + self.width,
-                        self.y,
-                        image.u + image.width,
-                        image.v,
-                        0,
-                    ),
-                    Vertex::textured(
-                        self.x,
-                        self.y + self.height,
-                        image.u,
-                        image.v + image.height,
-                        0,
-                    ),
-                );
-
-                batch.triangle(
-                    Vertex::textured(
-                        self.x + self.width,
-                        self.y,
-                        image.u + image.width,
-                        image.v,
-                        0,
-                    ),
-                    Vertex::textured(
-                        self.x,
-                        self.y + self.height,
-                        image.u,
-                        image.v + image.height,
-                        0,
-                    ),
-                    Vertex::textured(
-                        self.x + self.width,
-                        self.y + self.height,
-                        image.u + image.width,
-                        image.v + image.height,
-                        0,
-                    ),
-                );
+                VertexBuilder::new(VertexBuildingMode::Textured(image))
             }
-        }
+        };
+
+        batch.triangle(
+            builder.vertex(self.x, self.y, 0.0, 0.0),
+            builder.vertex(self.x + self.width, self.y, 1.0, 0.0),
+            builder.vertex(self.x, self.y + self.height, 0.0, 1.0),
+        );
+
+        batch.triangle(
+            builder.vertex(self.x + self.width, self.y, 1.0, 0.0),
+            builder.vertex(self.x, self.y + self.height, 0.0, 1.0),
+            builder.vertex(self.x + self.width, self.y + self.height, 1.0, 1.0),
+        );
 
         let athick = self.border.apparent_thickness();
         if athick == 0.0 {

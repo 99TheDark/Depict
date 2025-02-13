@@ -197,14 +197,19 @@ impl<'a> System<'a> for Game {
                 0.3 + std::f32::consts::PI,
                 2.7 + std::f32::consts::PI,
             )
-            .with_color(Color::BLUE)
+            .with_background(Background::Color(Color::BLUE))
             .with_border(Border::new(Color::RED, 5.0)),
         );
 
-        ctx.draw(
+        /*ctx.draw(
             Rectangle::new(1200.0, 200.0, 100.0, 100.0)
                 .with_background(Background::Image(self.grass))
                 .with_border(Border::new(Color::YELLOW, 15.0))
+                .with_border_radius(BorderRadius::all(10.0)),
+        );*/
+        ctx.draw(
+            Rectangle::new(1200.0, 200.0, 100.0, 100.0)
+                .with_background(Background::Image(self.grass))
                 .with_border_radius(BorderRadius::all(10.0)),
         );
     }

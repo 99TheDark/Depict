@@ -1,93 +1,14 @@
+use std::env::current_dir;
 use std::fs;
-use std::{env::current_dir, mem::size_of};
 
-use bytemuck::{Pod, Zeroable};
 use wgpu::{
-    BindGroupLayout, BlendState, BufferAddress, ColorTargetState, ColorWrites, Device,
-    FragmentState, FrontFace, MultisampleState, PipelineCompilationOptions,
-    PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RenderPipeline,
-    RenderPipelineDescriptor, ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexAttribute,
-    VertexBufferLayout, VertexFormat, VertexState, VertexStepMode,
+    BindGroupLayout, BlendState, ColorTargetState, ColorWrites, Device, FragmentState, FrontFace,
+    MultisampleState, PipelineCompilationOptions, PipelineLayoutDescriptor, PolygonMode,
+    PrimitiveState, PrimitiveTopology, RenderPipeline, RenderPipelineDescriptor,
+    ShaderModuleDescriptor, ShaderSource, TextureFormat, VertexState,
 };
 
-use crate::graphics::color::Color;
-
-struct Attributes {
-    pub attributes: Vec<VertexAttribute>,
-    offset: u64,
-}
-
-impl Attributes {
-    fn new() -> Self {
-        Self {
-            attributes: Vec::new(),
-            offset: 0,
-        }
-    }
-
-    fn add(&mut self, format: VertexFormat) {
-        let attribute = VertexAttribute {
-            offset: self.offset,
-            shader_location: self.attributes.len() as u32,
-            format,
-        };
-
-        self.attributes.push(attribute);
-        self.offset += format.size();
-    }
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, Pod, Zeroable, PartialEq)]
-pub struct Vertex {
-    pub pos: [f32; 2],
-    pub color: [f32; 4],
-    pub uv: [f32; 2],
-    pub atlas_idx: u32,
-}
-
-impl Vertex {
-    pub fn new(x: f32, y: f32, u: f32, v: f32, color: Color, atlas_idx: u32) -> Self {
-        Self {
-            pos: [x, y],
-            color: color.to_array(),
-            uv: [u, v],
-            atlas_idx,
-        }
-    }
-
-    pub fn colored(x: f32, y: f32, color: Color) -> Self {
-        Self {
-            pos: [x, y],
-            color: color.to_array(),
-            uv: [0.0, 0.0],
-            atlas_idx: u32::MAX,
-        }
-    }
-
-    pub fn textured(x: f32, y: f32, u: f32, v: f32, atlas_idx: u32) -> Self {
-        Self {
-            pos: [x, y],
-            color: [0.0, 0.0, 0.0, 0.0],
-            uv: [u, v],
-            atlas_idx,
-        }
-    }
-
-    fn description() -> VertexBufferLayout<'static> {
-        let mut attributes = Attributes::new();
-        attributes.add(VertexFormat::Float32x2); // Position
-        attributes.add(VertexFormat::Float32x4); // Color
-        attributes.add(VertexFormat::Float32x2); // UV
-        attributes.add(VertexFormat::Uint32); // Texture ID
-
-        VertexBufferLayout {
-            array_stride: size_of::<Vertex>() as BufferAddress,
-            step_mode: VertexStepMode::Vertex,
-            attributes: attributes.attributes.leak(),
-        }
-    }
-}
+use super::vertex::Vertex;
 
 pub struct Shader {
     shader_path: String,

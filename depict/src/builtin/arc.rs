@@ -1,8 +1,8 @@
 use depict_macro::shape;
 
 use crate::{
-    core::renderable::Renderable,
-    engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
+    core::{properties::Background, renderable::Renderable},
+    engine::{properties::Properties, renderer::RenderBatch, vertex::Vertex},
     graphics::{asset::Assets, color::Color},
 };
 
@@ -15,7 +15,7 @@ shape!(
         radius: f32, // TODO: Add x_radius, y_radius once ellipses are figured out
         start: f32,
         stop: f32,
-        color: Color = Color::CLEAR,
+        background: Background = Background::Color(Color::CLEAR),
         border: Border = Border::NONE,
     }
 );
@@ -24,8 +24,13 @@ impl Renderable for CircularArc {
     fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
+        let color = match self.background {
+            Background::Color(color) => color,
+            Background::Image(asset) => todo!(),
+        };
+
         let apparent_thickness = self.border.apparent_thickness();
-        if self.color == Color::CLEAR && apparent_thickness == 0.0 {
+        if color == Color::CLEAR && apparent_thickness == 0.0 {
             return;
         }
 
@@ -42,9 +47,9 @@ impl Renderable for CircularArc {
         }
 
         batch.triangle(
-            Vertex::colored(points[0].0, points[0].1, self.color),
-            Vertex::colored(points[1].0, points[1].1, self.color),
-            Vertex::colored(points[2].0, points[2].1, self.color),
+            Vertex::colored(points[0].0, points[0].1, color),
+            Vertex::colored(points[1].0, points[1].1, color),
+            Vertex::colored(points[2].0, points[2].1, color),
         );
 
         // TODO: Optimize significantly, especially the array creation and replacement
@@ -71,9 +76,9 @@ impl Renderable for CircularArc {
                 updated_points.push(new_point);
 
                 batch.triangle(
-                    Vertex::colored(cur_point.0, cur_point.1, self.color),
-                    Vertex::colored(next_point.0, next_point.1, self.color),
-                    Vertex::colored(new_point.0, new_point.1, self.color),
+                    Vertex::colored(cur_point.0, cur_point.1, color),
+                    Vertex::colored(next_point.0, next_point.1, color),
+                    Vertex::colored(new_point.0, new_point.1, color),
                 );
             }
 
@@ -84,9 +89,9 @@ impl Renderable for CircularArc {
         let first = points[0];
         let last = points.last().unwrap();
         batch.triangle(
-            Vertex::colored(self.x, self.y, self.color),
-            Vertex::colored(first.0, first.1, self.color),
-            Vertex::colored(last.0, last.1, self.color),
+            Vertex::colored(self.x, self.y, color),
+            Vertex::colored(first.0, first.1, color),
+            Vertex::colored(last.0, last.1, color),
         );
 
         if apparent_thickness == 0.0 {

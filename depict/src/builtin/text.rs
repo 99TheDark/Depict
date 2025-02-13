@@ -5,7 +5,7 @@ use crate::{
         properties::{Align, OverflowBreak},
         renderable::Renderable,
     },
-    engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
+    engine::{properties::Properties, renderer::RenderBatch, vertex::Vertex},
     graphics::{
         asset::{Asset, Assets, Font},
         color::Color,

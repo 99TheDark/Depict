@@ -2,7 +2,7 @@ use depict_macro::shape;
 
 use crate::{
     core::renderable::Renderable,
-    engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
+    engine::{properties::Properties, renderer::RenderBatch, vertex::Vertex},
     graphics::{asset::Assets, color::Color},
 };
 
