@@ -7,7 +7,7 @@ use crate::{
         properties::Properties,
         renderer::RenderBatch,
         vertex::Vertex,
-        vertex_builder::{VertexBuilder, VertexBuildingMode},
+        vertex_builder::{UVMappingMode, VertexBuilder},
     },
     graphics::{asset::Assets, color::Color},
 };
@@ -30,24 +30,31 @@ impl Renderable for Rectangle {
     fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
-        let builder = match self.background {
-            Background::Color(color) => VertexBuilder::new(VertexBuildingMode::Colored(color)),
-            Background::Image(asset) => {
-                let image = batch.assets.images.get(asset.id).clone();
-                VertexBuilder::new(VertexBuildingMode::Textured(image))
-            }
-        };
+        let builder = VertexBuilder::from_background(
+            batch,
+            self.background,
+            UVMappingMode::Corner,
+            self.x,
+            self.y,
+            self.width,
+            self.height,
+        );
+
+        let borderless = self.border.apparent_thickness() == 0.0;
+        if builder.invisible() && borderless {
+            return;
+        }
 
         batch.triangle(
-            builder.vertex(self.x, self.y, 0.0, 0.0),
-            builder.vertex(self.x + self.width, self.y, 1.0, 0.0),
-            builder.vertex(self.x, self.y + self.height, 0.0, 1.0),
+            builder.vertex(0.0, 0.0),
+            builder.vertex(1.0, 0.0),
+            builder.vertex(0.0, 1.0),
         );
 
         batch.triangle(
-            builder.vertex(self.x + self.width, self.y, 1.0, 0.0),
-            builder.vertex(self.x, self.y + self.height, 0.0, 1.0),
-            builder.vertex(self.x + self.width, self.y + self.height, 1.0, 1.0),
+            builder.vertex(1.0, 0.0),
+            builder.vertex(0.0, 1.0),
+            builder.vertex(1.0, 1.0),
         );
 
         let athick = self.border.apparent_thickness();
@@ -55,6 +62,9 @@ impl Renderable for Rectangle {
             return;
         }
 
+        if borderless {
+            return;
+        }
         // Top
         batch.triangle(
             Vertex::colored(self.x - athick, self.y - athick, self.border.color),

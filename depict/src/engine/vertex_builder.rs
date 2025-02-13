@@ -1,38 +1,108 @@
-use crate::graphics::{color::Color, image::Image};
+use crate::{
+    core::properties::Background,
+    graphics::{color::Color, image::Image},
+};
 
-use super::vertex::Vertex;
+use super::{renderer::RenderBatch, vertex::Vertex};
 
+#[derive(Debug)]
 pub enum VertexBuildingMode {
     Colored(Color),
     Textured(Image),
 }
 
+#[derive(Debug, Copy, Clone)]
+pub enum UVMappingMode {
+    Corner,
+    Center,
+}
+
 pub struct VertexBuilder {
-    pub mode: VertexBuildingMode,
+    pub vertex_mode: VertexBuildingMode,
+    pub uv_mode: UVMappingMode,
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
 }
 
 impl VertexBuilder {
-    pub fn new(mode: VertexBuildingMode) -> Self {
-        Self { mode }
+    pub fn new(
+        vertex_mode: VertexBuildingMode,
+        uv_mode: UVMappingMode,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> Self {
+        Self {
+            vertex_mode,
+            uv_mode,
+            x,
+            y,
+            width,
+            height,
+        }
     }
 
-    /// Creates a vertex depending on the mode provided
-    ///
-    /// # Arguments
-    /// * `x` - The x position of the vertex
-    /// * `y` - The y position of the vertex
-    /// * `u` - The relative 0 to 1 x coordinate of the texture
-    /// * `v` - The relative 0 to 1 y coordinate of the texture
-    pub fn vertex(&self, x: f32, y: f32, u: f32, v: f32) -> Vertex {
-        match self.mode {
-            VertexBuildingMode::Colored(color) => Vertex::colored(x, y, color),
-            VertexBuildingMode::Textured(image) => Vertex::textured(
+    pub fn from_background(
+        batch: &RenderBatch,
+        background: Background,
+        uv_mode: UVMappingMode,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> Self {
+        match background {
+            Background::Color(color) => VertexBuilder::new(
+                VertexBuildingMode::Colored(color),
+                uv_mode,
                 x,
                 y,
-                image.u + u * image.width,
-                image.v + v * image.height,
+                width,
+                height,
+            ),
+            Background::Image(asset) => {
+                let image = batch.assets.images.get(asset.id).clone();
+                VertexBuilder::new(
+                    VertexBuildingMode::Textured(image),
+                    uv_mode,
+                    x,
+                    y,
+                    width,
+                    height,
+                )
+            }
+        }
+    }
+
+    pub fn vertex(&self, x: f32, y: f32) -> Vertex {
+        match (&self.vertex_mode, &self.uv_mode) {
+            (VertexBuildingMode::Colored(color), ..) => {
+                Vertex::colored(self.x + x * self.width, self.y + y * self.height, *color)
+            }
+            (VertexBuildingMode::Textured(image), UVMappingMode::Corner) => Vertex::textured(
+                self.x + x * self.width,
+                self.y + y * self.height,
+                image.u + x * image.width,
+                image.v + y * image.height,
                 0, // TODO: Fix, it won't always be 0
             ),
+            (VertexBuildingMode::Textured(image), UVMappingMode::Center) => Vertex::textured(
+                self.x + x * self.width,
+                self.y + y * self.height,
+                image.u + (x + 1.0) * 0.5 * image.width,
+                image.v + (y + 1.0) * 0.5 * image.height,
+                0,
+            ),
+        }
+    }
+
+    pub fn invisible(&self) -> bool {
+        match self.vertex_mode {
+            VertexBuildingMode::Colored(color) => color == Color::CLEAR,
+            VertexBuildingMode::Textured(image) => image.id == u32::MAX,
         }
     }
 }
