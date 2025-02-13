@@ -1,3 +1,4 @@
+pub mod border;
 pub mod circle;
 pub mod ellipse;
 pub mod polygon;

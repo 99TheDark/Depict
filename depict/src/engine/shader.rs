@@ -56,6 +56,24 @@ impl Vertex {
         }
     }
 
+    pub fn colored(x: f32, y: f32, color: Color) -> Self {
+        Self {
+            pos: [x, y],
+            color: color.to_array(),
+            uv: [0.0, 0.0],
+            atlas_idx: u32::MAX,
+        }
+    }
+
+    pub fn textured(x: f32, y: f32, u: f32, v: f32, atlas_idx: u32) -> Self {
+        Self {
+            pos: [x, y],
+            color: [0.0, 0.0, 0.0, 0.0],
+            uv: [u, v],
+            atlas_idx,
+        }
+    }
+
     fn description() -> VertexBufferLayout<'static> {
         let mut attributes = Attributes::new();
         attributes.add(VertexFormat::Float32x2); // Position

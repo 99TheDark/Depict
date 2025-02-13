@@ -15,7 +15,6 @@ shape!(
         x_radius: f32,
         y_radius: f32,
         color: Color = Color::CLEAR,
-        resolution: f32 = 10.0,
     }
 );
 
@@ -27,30 +26,24 @@ impl Renderable for Ellipse {
             return;
         }
 
-        let seg_x = f32::sqrt(self.x_radius * self.resolution);
-        let seg_y = f32::sqrt(self.y_radius * self.resolution);
+        let seg_x = f32::sqrt(self.x_radius * 10.0);
+        let seg_y = f32::sqrt(self.y_radius * 10.0);
         let segments = u32::max(f32::sqrt(seg_x * seg_y) as u32, 10);
         for i in 0..segments {
             let start_angle = TAU / segments as f32 * i as f32;
             let end_angle = TAU / segments as f32 * (i + 1) as f32;
 
             batch.triangle(
-                Vertex::new(self.x, self.y, 0.0, 0.0, self.color, u32::MAX),
-                Vertex::new(
+                Vertex::colored(self.x, self.y, self.color),
+                Vertex::colored(
                     self.x + self.x_radius * start_angle.cos(),
                     self.y + self.y_radius * start_angle.sin(),
-                    0.0,
-                    0.0,
                     self.color,
-                    u32::MAX,
                 ),
-                Vertex::new(
+                Vertex::colored(
                     self.x + self.x_radius * end_angle.cos(),
                     self.y + self.y_radius * end_angle.sin(),
-                    0.0,
-                    0.0,
                     self.color,
-                    u32::MAX,
                 ),
             );
         }
