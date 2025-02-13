@@ -175,19 +175,18 @@ impl<'a> System<'a> for Game {
                 ctx.size.height / 2.0,
                 self.circle_size,
             )
-            .with_color(Color::GREEN)
-            .with_border(Border::new(Color::WHITE, 30.0)),
+            .with_color(Color::GREEN), //.with_border(Border::new(Color::WHITE, 30.0)),
         );
 
-        /*ctx.draw(
+        ctx.draw(
             Ellipse::new(
                 ctx.size.width / 2.0,
                 ctx.size.height / 2.0 + 400.0,
                 (f32::sin(ctx.time.seconds() as f32) + 1.1) * 100.0,
                 (f32::cos(ctx.time.seconds() as f32 * 2.0 + 2.0) + 1.1) * 100.0,
             )
-            .with_color(Color::MAGENTA),
-        );*/
+            .with_color(Color::MAGENTA), //.with_border(Border::new(Color::CYAN, 5.0)),
+        );
     }
 }
 

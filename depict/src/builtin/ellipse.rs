@@ -15,7 +15,6 @@ shape!(
         x_radius: f32,
         y_radius: f32,
         color: Color = Color::CLEAR,
-        resolution: f32 = 10.0,
     }
 );
 
@@ -27,8 +26,8 @@ impl Renderable for Ellipse {
             return;
         }
 
-        let seg_x = f32::sqrt(self.x_radius * self.resolution);
-        let seg_y = f32::sqrt(self.y_radius * self.resolution);
+        let seg_x = f32::sqrt(self.x_radius * 10.0);
+        let seg_y = f32::sqrt(self.y_radius * 10.0);
         let segments = u32::max(f32::sqrt(seg_x * seg_y) as u32, 10);
         for i in 0..segments {
             let start_angle = TAU / segments as f32 * i as f32;
