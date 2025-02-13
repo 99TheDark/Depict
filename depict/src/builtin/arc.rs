@@ -1,5 +1,3 @@
-use std::f32::consts::TAU;
-
 use depict_macro::shape;
 
 use crate::{
@@ -11,34 +9,34 @@ use crate::{
 use super::border::Border;
 
 shape!(
-    pub struct Circle {
+    pub struct CircularArc {
         x: f32,
         y: f32,
-        radius: f32,
+        radius: f32, // TODO: Add x_radius, y_radius once ellipses are figured out
+        start: f32,
+        stop: f32,
         color: Color = Color::CLEAR,
         border: Border = Border::NONE,
     }
 );
 
-impl Renderable for Circle {
+impl Renderable for CircularArc {
     fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
-        const ANGLE_STEP: f32 = TAU / 3.0;
-
-        let borderless = self.border.apparent_thickness() == 0.0;
-        if self.color == Color::CLEAR && borderless {
+        if self.color == Color::CLEAR {
             return;
         }
 
         let approximate_iterations = ((self.radius + self.border.thickness) / 3.0).ln();
-        let iterations = u32::max(approximate_iterations.round() as u32, 1);
+        let iterations = u32::min(approximate_iterations.round() as u32, 1);
 
         let mut points = Vec::with_capacity(3);
+        let angle_step = (self.stop - self.start) / 3.0;
         for i in 0..3 {
             points.push((
-                self.x + self.radius * (ANGLE_STEP * i as f32).cos(),
-                self.y + self.radius * (ANGLE_STEP * i as f32).sin(),
+                self.x + self.radius * (self.start + angle_step * i as f32).cos(),
+                self.y + self.radius * (self.start + angle_step * i as f32).sin(),
             ));
         }
 
@@ -81,7 +79,7 @@ impl Renderable for Circle {
             points = updated_points;
         }
 
-        if borderless {
+        /*if self.border.thickness == 0.0 || self.border.color == Color::CLEAR {
             return;
         }
 
@@ -110,6 +108,6 @@ impl Renderable for Circle {
                 Vertex::colored(cur_border_point.0, cur_border_point.1, self.border.color),
                 Vertex::colored(next_border_point.0, next_border_point.1, self.border.color),
             );
-        }
+        }*/
     }
 }

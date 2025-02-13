@@ -15,4 +15,12 @@ impl Border {
     pub fn new(color: Color, thickness: f32) -> Self {
         Self { color, thickness }
     }
+
+    pub fn apparent_thickness(&self) -> f32 {
+        if self.color == Color::CLEAR {
+            return 0.0;
+        } else {
+            return self.thickness;
+        }
+    }
 }

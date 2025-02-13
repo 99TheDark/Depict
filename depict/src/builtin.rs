@@ -1,3 +1,4 @@
+pub mod arc;
 pub mod border;
 pub mod circle;
 pub mod ellipse;
