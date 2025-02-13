@@ -26,12 +26,12 @@ impl Renderable for Circle {
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
         const ANGLE_STEP: f32 = TAU / 3.0;
 
-        let borderless = self.border.apparent_thickness() == 0.0;
-        if self.color == Color::CLEAR && borderless {
+        let apparent_thickness = self.border.apparent_thickness();
+        if self.color == Color::CLEAR && apparent_thickness == 0.0 {
             return;
         }
 
-        let approximate_iterations = ((self.radius + self.border.thickness) / 3.0).ln();
+        let approximate_iterations = ((self.radius + apparent_thickness) / 3.0).ln();
         let iterations = u32::max(approximate_iterations.round() as u32, 1);
 
         let mut points = Vec::with_capacity(3);
@@ -81,7 +81,7 @@ impl Renderable for Circle {
             points = updated_points;
         }
 
-        if borderless {
+        if apparent_thickness == 0.0 {
             return;
         }
 

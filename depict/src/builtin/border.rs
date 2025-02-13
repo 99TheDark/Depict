@@ -7,7 +7,7 @@ pub struct Border {
 }
 
 impl Border {
-    pub const NONE: Border = Border {
+    pub const NONE: Self = Self {
         color: Color::CLEAR,
         thickness: 0.0,
     };

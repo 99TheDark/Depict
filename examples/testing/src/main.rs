@@ -2,8 +2,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use depict::{
     builtin::{
-        arc::CircularArc, border::Border, circle::Circle, ellipse::Ellipse, rectangle::Rectangle,
-        text::Text, triangle::Triangle,
+        arc::CircularArc, border::Border, border_radius::BorderRadius, circle::Circle,
+        ellipse::Ellipse, rectangle::Rectangle, text::Text, triangle::Triangle,
     },
     core::{
         context::{Context, PartialContext},
@@ -194,10 +194,18 @@ impl<'a> System<'a> for Game {
                 ctx.size.width / 2.0 + 200.0,
                 ctx.size.height / 2.0 - 100.0,
                 100.0,
-                0.3,
-                2.7,
+                0.3 + std::f32::consts::PI,
+                2.7 + std::f32::consts::PI,
             )
-            .with_color(Color::BLUE),
+            .with_color(Color::BLUE)
+            .with_border(Border::new(Color::RED, 5.0)),
+        );
+
+        ctx.draw(
+            Rectangle::new(1200.0, 200.0, 100.0, 100.0)
+                .with_background(Background::Image(self.grass))
+                .with_border(Border::new(Color::YELLOW, 15.0))
+                .with_border_radius(BorderRadius::all(10.0)),
         );
     }
 }

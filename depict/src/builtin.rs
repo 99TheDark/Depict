@@ -1,5 +1,6 @@
 pub mod arc;
 pub mod border;
+pub mod border_radius;
 pub mod circle;
 pub mod ellipse;
 pub mod polygon;

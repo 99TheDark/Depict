@@ -1,6 +1,7 @@
 use depict_macro::shape;
 
 use crate::{
+    builtin::border_radius::BorderRadius,
     core::{properties::Background, renderable::Renderable},
     engine::{properties::Properties, renderer::RenderBatch, shader::Vertex},
     graphics::{asset::Assets, color::Color},
@@ -15,6 +16,7 @@ shape!(
         width: f32,
         height: f32,
         background: Background = Background::Color(Color::CLEAR),
+        border_radius: BorderRadius = BorderRadius::NONE,
         border: Border = Border::NONE,
     }
 );
@@ -86,5 +88,86 @@ impl Renderable for Rectangle {
                 );
             }
         }
+
+        let athick = self.border.apparent_thickness();
+        if athick == 0.0 {
+            return;
+        }
+
+        // Top
+        batch.triangle(
+            Vertex::colored(self.x - athick, self.y - athick, self.border.color),
+            Vertex::colored(self.x - athick, self.y, self.border.color),
+            Vertex::colored(self.x + self.width + athick, self.y, self.border.color),
+        );
+        batch.triangle(
+            Vertex::colored(self.x - athick, self.y - athick, self.border.color),
+            Vertex::colored(
+                self.x + self.width + athick,
+                self.y - athick,
+                self.border.color,
+            ),
+            Vertex::colored(self.x + self.width + athick, self.y, self.border.color),
+        );
+
+        // Bottom
+        batch.triangle(
+            Vertex::colored(
+                self.x - athick,
+                self.y + self.height + athick,
+                self.border.color,
+            ),
+            Vertex::colored(self.x - athick, self.y + self.height, self.border.color),
+            Vertex::colored(
+                self.x + self.width + athick,
+                self.y + self.height,
+                self.border.color,
+            ),
+        );
+        batch.triangle(
+            Vertex::colored(
+                self.x - athick,
+                self.y + self.height + athick,
+                self.border.color,
+            ),
+            Vertex::colored(
+                self.x + self.width + athick,
+                self.y + self.height + athick,
+                self.border.color,
+            ),
+            Vertex::colored(
+                self.x + self.width + athick,
+                self.y + self.height,
+                self.border.color,
+            ),
+        );
+
+        // Left
+        batch.triangle(
+            Vertex::colored(self.x - athick, self.y, self.border.color),
+            Vertex::colored(self.x, self.y, self.border.color),
+            Vertex::colored(self.x, self.y + self.height, self.border.color),
+        );
+        batch.triangle(
+            Vertex::colored(self.x - athick, self.y, self.border.color),
+            Vertex::colored(self.x - athick, self.y + self.height, self.border.color),
+            Vertex::colored(self.x, self.y + self.height, self.border.color),
+        );
+
+        // Right
+        batch.triangle(
+            Vertex::colored(self.x + self.width + athick, self.y, self.border.color),
+            Vertex::colored(self.x + self.width, self.y, self.border.color),
+            Vertex::colored(self.x + self.width, self.y + self.height, self.border.color),
+        );
+        batch.triangle(
+            Vertex::colored(self.x + self.width + athick, self.y, self.border.color),
+            Vertex::colored(
+                self.x + self.width + athick,
+                self.y + self.height,
+                self.border.color,
+            ),
+            Vertex::colored(self.x + self.width, self.y + self.height, self.border.color),
+        );
     }
 }

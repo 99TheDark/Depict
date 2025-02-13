@@ -24,15 +24,16 @@ impl Renderable for CircularArc {
     fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
 
     fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
-        if self.color == Color::CLEAR {
+        let apparent_thickness = self.border.apparent_thickness();
+        if self.color == Color::CLEAR && apparent_thickness == 0.0 {
             return;
         }
 
-        let approximate_iterations = ((self.radius + self.border.thickness) / 3.0).ln();
-        let iterations = u32::min(approximate_iterations.round() as u32, 1);
+        let approximate_iterations = ((self.radius + apparent_thickness) / 3.0).ln();
+        let iterations = u32::max(approximate_iterations.round() as u32, 1);
 
         let mut points = Vec::with_capacity(3);
-        let angle_step = (self.stop - self.start) / 3.0;
+        let angle_step = (self.stop - self.start) / 2.0;
         for i in 0..3 {
             points.push((
                 self.x + self.radius * (self.start + angle_step * i as f32).cos(),
@@ -48,10 +49,10 @@ impl Renderable for CircularArc {
 
         // TODO: Optimize significantly, especially the array creation and replacement
         for _ in 0..iterations {
-            let mut updated_points = Vec::with_capacity(points.len() * 2);
-            for j in 0..points.len() {
+            let mut updated_points = Vec::with_capacity(points.len() * 2 - 1);
+            for j in 0..points.len() - 1 {
                 let cur_point = points[j];
-                let next_point = points[(j + 1) % points.len()];
+                let next_point = points[j + 1];
 
                 let mid_x = (cur_point.0 + next_point.0) * 0.5;
                 let mid_y = (cur_point.1 + next_point.1) * 0.5;
@@ -76,10 +77,19 @@ impl Renderable for CircularArc {
                 );
             }
 
+            updated_points.push(*points.last().unwrap());
             points = updated_points;
         }
 
-        /*if self.border.thickness == 0.0 || self.border.color == Color::CLEAR {
+        let first = points[0];
+        let last = points.last().unwrap();
+        batch.triangle(
+            Vertex::colored(self.x, self.y, self.color),
+            Vertex::colored(first.0, first.1, self.color),
+            Vertex::colored(last.0, last.1, self.color),
+        );
+
+        if apparent_thickness == 0.0 {
             return;
         }
 
@@ -92,11 +102,11 @@ impl Renderable for CircularArc {
             ));
         }
 
-        for i in 0..points.len() {
+        for i in 0..points.len() - 1 {
             let cur_edge_point = points[i];
-            let next_edge_point = points[(i + 1) % points.len()];
+            let next_edge_point = points[i + 1];
             let cur_border_point = border_points[i];
-            let next_border_point = border_points[(i + 1) % border_points.len()];
+            let next_border_point = border_points[i + 1];
 
             batch.triangle(
                 Vertex::colored(cur_edge_point.0, cur_edge_point.1, self.border.color),
@@ -108,6 +118,6 @@ impl Renderable for CircularArc {
                 Vertex::colored(cur_border_point.0, cur_border_point.1, self.border.color),
                 Vertex::colored(next_border_point.0, next_border_point.1, self.border.color),
             );
-        }*/
+        }
     }
 }
