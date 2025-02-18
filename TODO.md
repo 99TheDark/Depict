@@ -1,4 +1,5 @@
 # TODO
+- Make atlas update over time
 - Clipping (remove out-of-bounds objects; though, this may be tricky when transformations are added)
 - Comment documentation
 - Change from nearest neighbor to something else in settings (or image settings)

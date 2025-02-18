@@ -5,7 +5,7 @@ use crate::{
 
 use super::{renderer::RenderBatch, vertex::Vertex};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum VertexBuildingMode {
     Colored(Color),
     Textured(Image),
@@ -96,6 +96,17 @@ impl VertexBuilder {
                 image.v + (y + 1.0) * 0.5 * image.height,
                 0,
             ),
+        }
+    }
+
+    pub fn slice(&self, x: f32, y: f32, width: f32, height: f32) -> Self {
+        Self {
+            vertex_mode: self.vertex_mode,
+            uv_mode: self.uv_mode,
+            x: self.x + x * self.width,
+            y: self.y + y * self.height,
+            width: self.width * width,
+            height: self.height * height,
         }
     }
 

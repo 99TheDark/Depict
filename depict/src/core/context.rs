@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use fontdue::FontSettings;
 use image::DynamicImage;
-use wgpu::Queue;
+use wgpu::{Device, Queue};
 use winit::window::Window;
 
 use crate::{
@@ -95,7 +95,7 @@ impl<'a> Context<'a> {
         );
     }
 
-    pub(crate) fn render(&mut self, queue: &Queue, properties: &Properties) {
+    pub(crate) fn render(&mut self, queue: &Queue, device: &Device, properties: &Properties) {
         let renderer = self.renderer.as_mut().unwrap();
 
         // Putting true on TANKS performance since it is a double for loop
@@ -110,8 +110,8 @@ impl<'a> Context<'a> {
 
         batch.assets.fonts.update();
 
-        batch.assets.images.update(&queue);
-        batch.assets.fonts.atlas.update(&queue);
+        batch.assets.images.update(&queue, &device);
+        batch.assets.fonts.atlas.update(&queue, &device);
 
         for renderable in &self.renderables {
             renderable.render(&mut batch, &properties);

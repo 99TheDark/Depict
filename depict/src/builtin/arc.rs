@@ -25,32 +25,28 @@ shape!(
     }
 );
 
-impl Renderable for CircularArc {
-    fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
-
-    fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
-        let builder = VertexBuilder::from_background(
-            batch,
-            self.background,
-            UVMappingMode::Center,
-            self.x,
-            self.y,
-            self.radius,
-            self.radius,
-        );
-
-        let apparent_thickness = self.border.apparent_thickness();
+impl CircularArc {
+    pub(crate) fn arc(
+        batch: &mut RenderBatch,
+        builder: VertexBuilder,
+        radius: f32,
+        start: f32,
+        stop: f32,
+        border: Border,
+        true_radius: f32,
+    ) {
+        let apparent_thickness = border.apparent_thickness();
         if builder.invisible() && apparent_thickness == 0.0 {
             return;
         }
 
-        let approximate_iterations = ((self.radius + apparent_thickness) / 3.0).ln();
+        let approximate_iterations = ((true_radius + apparent_thickness) / 3.0).ln();
         let iterations = u32::max(approximate_iterations.round() as u32, 1) + 1;
 
         let mut points = Vec::with_capacity(3);
-        let angle_step = (self.stop - self.start) / 2.0;
+        let angle_step = (stop - start) / 2.0;
         for i in 0..3 {
-            let angle = self.start + angle_step * i as f32;
+            let angle = start + angle_step * i as f32;
             points.push((angle.cos(), angle.sin()));
         }
 
@@ -101,14 +97,17 @@ impl Renderable for CircularArc {
         }
 
         let mut border_points = Vec::with_capacity(points.len());
-        let multiplier = self.border.thickness + self.radius;
+        let multiplier = border.thickness + radius;
         for point in &points {
-            border_points.push((point.0 * multiplier + self.x, point.1 * multiplier + self.y));
+            border_points.push((
+                point.0 * multiplier + builder.x,
+                point.1 * multiplier + builder.y,
+            ));
         }
 
         for point in &mut points {
-            point.0 = point.0 * self.radius + self.x;
-            point.1 = point.1 * self.radius + self.y;
+            point.0 = point.0 * radius + builder.x;
+            point.1 = point.1 * radius + builder.y;
         }
 
         for i in 0..points.len() - 1 {
@@ -118,15 +117,41 @@ impl Renderable for CircularArc {
             let next_border_point = border_points[i + 1];
 
             batch.triangle(
-                Vertex::colored(cur_edge_point.0, cur_edge_point.1, self.border.color),
-                Vertex::colored(next_edge_point.0, next_edge_point.1, self.border.color),
-                Vertex::colored(cur_border_point.0, cur_border_point.1, self.border.color),
+                Vertex::colored(cur_edge_point.0, cur_edge_point.1, border.color),
+                Vertex::colored(next_edge_point.0, next_edge_point.1, border.color),
+                Vertex::colored(cur_border_point.0, cur_border_point.1, border.color),
             );
             batch.triangle(
-                Vertex::colored(next_edge_point.0, next_edge_point.1, self.border.color),
-                Vertex::colored(cur_border_point.0, cur_border_point.1, self.border.color),
-                Vertex::colored(next_border_point.0, next_border_point.1, self.border.color),
+                Vertex::colored(next_edge_point.0, next_edge_point.1, border.color),
+                Vertex::colored(cur_border_point.0, cur_border_point.1, border.color),
+                Vertex::colored(next_border_point.0, next_border_point.1, border.color),
             );
         }
+    }
+}
+
+impl Renderable for CircularArc {
+    fn request(&self, _assets: &mut Assets, _properties: &Properties) {}
+
+    fn render(&self, batch: &mut RenderBatch, _properties: &Properties) {
+        let builder = VertexBuilder::from_background(
+            batch,
+            self.background,
+            UVMappingMode::Center,
+            self.x,
+            self.y,
+            self.radius,
+            self.radius,
+        );
+
+        Self::arc(
+            batch,
+            builder,
+            self.radius,
+            self.start,
+            self.stop,
+            self.border,
+            self.radius,
+        );
     }
 }

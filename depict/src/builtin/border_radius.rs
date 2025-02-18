@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct BorderRadius {
     pub top_left: f32,
     pub top_right: f32,
@@ -66,5 +66,18 @@ impl BorderRadius {
             bottom_left: 0.0,
             bottom_right,
         }
+    }
+
+    pub(crate) fn mapped(
+        &self,
+        width: f32,
+        height: f32,
+    ) -> ((f32, f32), (f32, f32), (f32, f32), (f32, f32)) {
+        (
+            (self.top_left / width, self.top_left / height),
+            (self.top_right / width, self.top_right / height),
+            (self.bottom_left / width, self.bottom_left / height),
+            (self.bottom_right / width, self.bottom_right / height),
+        )
     }
 }

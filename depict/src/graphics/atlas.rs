@@ -110,7 +110,7 @@ impl Atlas {
         Ok(placements.unwrap())
     }
 
-    pub(crate) fn update(&mut self, queue: &Queue) {
+    pub(crate) fn update(&mut self, queue: &Queue, device: &Device) {
         if !self.edited {
             return;
         }
@@ -147,6 +147,25 @@ impl Atlas {
             }
         }
 
+        self.extent = Extent3d {
+            width: self.size,
+            height: self.size,
+            depth_or_array_layers: 1,
+        };
+
+        self.texture = device.create_texture(&TextureDescriptor {
+            size: self.extent,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8UnormSrgb,
+            usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+            label: None,
+            view_formats: &[],
+        });
+
+        self.view = self.texture.create_view(&TextureViewDescriptor::default());
+
         queue.write_texture(
             ImageCopyTexture {
                 texture: &self.texture,
@@ -169,7 +188,10 @@ impl Atlas {
         self.edited = false;
 
         /*DynamicImage::ImageRgba8(image::RgbaImage::from_vec(self.size, self.size, rgba).unwrap())
-        .save("res/out/font.png")
+        .save(format!(
+            "examples/testing/res/out/{}.png",
+            self.sources.len()
+        ))
         .unwrap();*/
     }
 

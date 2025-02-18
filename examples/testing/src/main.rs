@@ -24,6 +24,7 @@ struct Game {
     dirt: Asset<Image>,
     grass: Asset<Image>,
     brick: Asset<Image>,
+    uv_gradient: Asset<Image>,
 
     roboto: Asset<Font>,
 
@@ -37,6 +38,7 @@ impl<'a> System<'a> for Game {
         self.dirt = ctx.image(include_bytes!("../res/dirt.png"));
         self.grass = ctx.image(include_bytes!("../res/grass.png"));
         self.brick = ctx.image(include_bytes!("../res/brick.png"));
+        self.uv_gradient = ctx.image(include_bytes!("../res/uv_gradient.png"));
 
         // Loads the entire Roboto font
         self.roboto = ctx.font(HashMap::from([
@@ -201,17 +203,18 @@ impl<'a> System<'a> for Game {
             .with_border(Border::new(Color::RED, 5.0)),
         );
 
-        /*ctx.draw(
+        ctx.draw(
+            Rectangle::new(1100.0, 200.0, 250.0, 150.0)
+                // .with_background(Background::Color(Color::from_rgb(255, 128, 0)))
+                .with_background(Background::Image(self.uv_gradient))
+                // .with_border(Border::new(Color::YELLOW, 15.0))
+                .with_border_radius(BorderRadius::new(15.0, 30.0, 10.0, 50.0)),
+        );
+        /* ctx.draw(
             Rectangle::new(1200.0, 200.0, 100.0, 100.0)
                 .with_background(Background::Image(self.grass))
-                .with_border(Border::new(Color::YELLOW, 15.0))
                 .with_border_radius(BorderRadius::all(10.0)),
         );*/
-        ctx.draw(
-            Rectangle::new(1200.0, 200.0, 100.0, 100.0)
-                .with_background(Background::Image(self.grass))
-                .with_border_radius(BorderRadius::all(10.0)),
-        );
     }
 }
 
@@ -222,6 +225,7 @@ fn main() {
             dirt: Asset::default(),
             grass: Asset::default(),
             brick: Asset::default(),
+            uv_gradient: Asset::default(),
 
             roboto: Asset::default(),
 

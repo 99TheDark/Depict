@@ -333,7 +333,7 @@ impl<'a> State<'a> {
         };
 
         self.system.borrow_mut().render(&mut ctx);
-        ctx.render(&self.queue, &self.properties);
+        ctx.render(&self.queue, &self.device, &self.properties);
 
         renderer.build(&self.device)
     }
